@@ -1,449 +1,133 @@
-import type { Transaction } from '../App';
+// filename: dsa.ts
 
-// ===========================
-// 1. MERGE SORT IMPLEMENTATION
-// ===========================
-export function mergeSort(
-  transactions: Transaction[],
-  sortBy: 'amount' | 'date',
-  order: 'asc' | 'desc' = 'asc'
-): Transaction[] {
-  if (transactions.length <= 1) return transactions;
-
-  const mid = Math.floor(transactions.length / 2);
-  const left = mergeSort(transactions.slice(0, mid), sortBy, order);
-  const right = mergeSort(transactions.slice(mid), sortBy, order);
-
-  return merge(left, right, sortBy, order);
+// 1. DATA TYPES
+export interface Transaction {
+  id: string;
+  category: string;
+  title: string;
+  description: string;
+  amount: number;
+  cardType: 'bank' | 'cash' | 'savings';
+  date: string;
+  time: string;
 }
 
-function merge(
-  left: Transaction[],
-  right: Transaction[],
-  sortBy: 'amount' | 'date',
-  order: 'asc' | 'desc'
-): Transaction[] {
-  const result: Transaction[] = [];
-  let i = 0;
-  let j = 0;
-
-  while (i < left.length && j < right.length) {
-    const comparison = compareTransactions(left[i], right[j], sortBy, order);
-    if (comparison <= 0) {
-      result.push(left[i]);
-      i++;
-    } else {
-      result.push(right[j]);
-      j++;
-    }
-  }
-
-  return result.concat(left.slice(i)).concat(right.slice(j));
-}
-
-function compareTransactions(
-  a: Transaction,
-  b: Transaction,
-  sortBy: 'amount' | 'date',
-  order: 'asc' | 'desc'
-): number {
-  let comparison = 0;
-
-  if (sortBy === 'amount') {
-    comparison = a.amount - b.amount;
-  } else if (sortBy === 'date') {
-    const dateA = new Date(a.date + ' ' + a.time).getTime();
-    const dateB = new Date(b.date + ' ' + b.time).getTime();
-    comparison = dateA - dateB;
-  }
-
-  return order === 'asc' ? comparison : -comparison;
-}
-
-// ===========================
-// 2. BINARY SEARCH TREE (BST)
-// ===========================
-class BSTNode {
-  transaction: Transaction;
-  left: BSTNode | null = null;
-  right: BSTNode | null = null;
-
-  constructor(transaction: Transaction) {
-    this.transaction = transaction;
-  }
-}
-
-export class BinarySearchTree {
-  root: BSTNode | null = null;
-  private compareKey: 'amount' | 'date';
-
-  constructor(compareKey: 'amount' | 'date' = 'amount') {
-    this.compareKey = compareKey;
-  }
-
-  insert(transaction: Transaction): void {
-    this.root = this.insertNode(this.root, transaction);
-  }
-
-  private insertNode(node: BSTNode | null, transaction: Transaction): BSTNode {
-    if (node === null) {
-      return new BSTNode(transaction);
-    }
-
-    const comparison = this.compare(transaction, node.transaction);
-    if (comparison < 0) {
-      node.left = this.insertNode(node.left, transaction);
-    } else {
-      node.right = this.insertNode(node.right, transaction);
-    }
-
-    return node;
-  }
-
-  private compare(a: Transaction, b: Transaction): number {
-    if (this.compareKey === 'amount') {
-      return a.amount - b.amount;
-    } else {
-      const dateA = new Date(a.date + ' ' + a.time).getTime();
-      const dateB = new Date(b.date + ' ' + b.time).getTime();
-      return dateA - dateB;
-    }
-  }
-
-  // In-order traversal (returns sorted array)
-  inOrderTraversal(): Transaction[] {
-    const result: Transaction[] = [];
-    this.inOrder(this.root, result);
-    return result;
-  }
-
-  private inOrder(node: BSTNode | null, result: Transaction[]): void {
-    if (node !== null) {
-      this.inOrder(node.left, result);
-      result.push(node.transaction);
-      this.inOrder(node.right, result);
-    }
-  }
-
-  // Search for transactions within a range (for filtering)
-  searchRange(min: number, max: number): Transaction[] {
-    const result: Transaction[] = [];
-    this.searchRangeHelper(this.root, min, max, result);
-    return result;
-  }
-
-  private searchRangeHelper(
-    node: BSTNode | null,
-    min: number,
-    max: number,
-    result: Transaction[]
-  ): void {
-    if (node === null) return;
-
-    const value = this.compareKey === 'amount' 
-      ? node.transaction.amount 
-      : new Date(node.transaction.date + ' ' + node.transaction.time).getTime();
-
-    if (value > min) {
-      this.searchRangeHelper(node.left, min, max, result);
-    }
-    if (value >= min && value <= max) {
-      result.push(node.transaction);
-    }
-    if (value < max) {
-      this.searchRangeHelper(node.right, min, max, result);
-    }
-  }
-}
-
-// ===========================
-// 3. BINARY SEARCH
-// ===========================
-export function binarySearch(
-  sortedTransactions: Transaction[],
-  target: number,
-  searchBy: 'amount' = 'amount'
-): Transaction | null {
-  let left = 0;
-  let right = sortedTransactions.length - 1;
-
-  while (left <= right) {
-    const mid = Math.floor((left + right) / 2);
-    const midValue = sortedTransactions[mid].amount;
-
-    if (midValue === target) {
-      return sortedTransactions[mid];
-    } else if (midValue < target) {
-      left = mid + 1;
-    } else {
-      right = mid - 1;
-    }
-  }
-
-  return null;
-}
-
-// Search for closest match (for approximate search)
-export function binarySearchClosest(
-  sortedTransactions: Transaction[],
-  target: number
-): Transaction[] {
-  if (sortedTransactions.length === 0) return [];
-
-  let left = 0;
-  let right = sortedTransactions.length - 1;
-  let closestIndex = 0;
-  let closestDiff = Math.abs(sortedTransactions[0].amount - target);
-
-  while (left <= right) {
-    const mid = Math.floor((left + right) / 2);
-    const midValue = sortedTransactions[mid].amount;
-    const diff = Math.abs(midValue - target);
-
-    if (diff < closestDiff) {
-      closestDiff = diff;
-      closestIndex = mid;
-    }
-
-    if (midValue === target) {
-      break;
-    } else if (midValue < target) {
-      left = mid + 1;
-    } else {
-      right = mid - 1;
-    }
-  }
-
-  // Return matches within 10% of target
-  const threshold = target * 0.1;
-  return sortedTransactions.filter(t => Math.abs(t.amount - target) <= threshold);
-}
-
-// ===========================
-// 4. HASH MAP (Category Management)
-// ===========================
-export class TransactionHashMap {
-  private map: Map<string, Transaction[]>;
-
-  constructor() {
-    this.map = new Map();
-  }
-
-  // O(1) insertion
-  insert(transaction: Transaction): void {
-    const category = transaction.category;
-    if (!this.map.has(category)) {
-      this.map.set(category, []);
-    }
-    this.map.get(category)!.push(transaction);
-  }
-
-  // O(1) retrieval
-  getByCategory(category: string): Transaction[] {
-    return this.map.get(category) || [];
-  }
-
-  // Get all categories
-  getAllCategories(): string[] {
-    return Array.from(this.map.keys());
-  }
-
-  // Get transaction count by category
-  getCategoryCount(category: string): number {
-    return this.map.get(category)?.length || 0;
-  }
-
-  // Clear and rebuild
-  rebuild(transactions: Transaction[]): void {
-    this.map.clear();
-    transactions.forEach(t => this.insert(t));
-  }
-}
-
-// ===========================
-// 5. STACK (Undo/Redo Operations)
-// ===========================
 export interface HistoryState {
   transactions: Transaction[];
-  balances: {
-    bank: number;
-    cash: number;
-    savings: number;
-  };
+  balances: any;
   action: string;
   timestamp: number;
 }
 
-export class UndoRedoStack {
-  private undoStack: HistoryState[];
-  private redoStack: HistoryState[];
+// 2. STACK IMPLEMENTATION (For Undo/Redo)
+class StackNode<T> {
+  data: T;
+  next: StackNode<T> | null = null;
+  constructor(data: T) { this.data = data; }
+}
+
+export class UndoRedoStack<T> {
+  private top: StackNode<T> | null = null;
+  private size: number = 0;
   private maxSize: number;
 
   constructor(maxSize: number = 50) {
-    this.undoStack = [];
-    this.redoStack = [];
     this.maxSize = maxSize;
   }
 
-  // Push new state to undo stack
-  push(state: HistoryState): void {
-    this.undoStack.push(state);
-    // Clear redo stack when new action is performed
-    this.redoStack = [];
-    
-    // Maintain max size
-    if (this.undoStack.length > this.maxSize) {
-      this.undoStack.shift();
-    }
-  }
-
-  // Undo operation
-  undo(): HistoryState | null {
-    if (this.undoStack.length === 0) return null;
-    
-    const state = this.undoStack.pop()!;
-    this.redoStack.push(state);
-    
-    return state;
-  }
-
-  // Redo operation
-  redo(): HistoryState | null {
-    if (this.redoStack.length === 0) return null;
-    
-    const state = this.redoStack.pop()!;
-    this.undoStack.push(state);
-    
-    return state;
-  }
-
-  canUndo(): boolean {
-    return this.undoStack.length > 0;
-  }
-
-  canRedo(): boolean {
-    return this.redoStack.length > 0;
-  }
-
-  clear(): void {
-    this.undoStack = [];
-    this.redoStack = [];
-  }
-}
-
-// ===========================
-// 6. QUEUE (Transaction Processing)
-// ===========================
-export class TransactionQueue {
-  private queue: Transaction[];
-
-  constructor() {
-    this.queue = [];
-  }
-
-  // Enqueue (add to end)
-  enqueue(transaction: Transaction): void {
-    this.queue.push(transaction);
-  }
-
-  // Dequeue (remove from front)
-  dequeue(): Transaction | null {
-    return this.queue.shift() || null;
-  }
-
-  // Peek at front
-  peek(): Transaction | null {
-    return this.queue[0] || null;
-  }
-
-  // Get all items
-  getAll(): Transaction[] {
-    return [...this.queue];
-  }
-
-  // Check if empty
-  isEmpty(): boolean {
-    return this.queue.length === 0;
-  }
-
-  size(): number {
-    return this.queue.length;
-  }
-}
-
-// ===========================
-// 7. LINKED LIST (Transaction Chain)
-// ===========================
-class ListNode {
-  transaction: Transaction;
-  next: ListNode | null = null;
-  prev: ListNode | null = null;
-
-  constructor(transaction: Transaction) {
-    this.transaction = transaction;
-  }
-}
-
-export class TransactionLinkedList {
-  private head: ListNode | null = null;
-  private tail: ListNode | null = null;
-  private size: number = 0;
-
-  // Add to front (newest transaction)
-  addFirst(transaction: Transaction): void {
-    const newNode = new ListNode(transaction);
-    if (this.head === null) {
-      this.head = this.tail = newNode;
-    } else {
-      newNode.next = this.head;
-      this.head.prev = newNode;
-      this.head = newNode;
+  push(data: T): void {
+    const newNode = new StackNode(data);
+    if (this.top === null) this.top = newNode;
+    else {
+      newNode.next = this.top;
+      this.top = newNode;
     }
     this.size++;
+    if (this.size > this.maxSize) this.removeBottom();
   }
 
-  // Add to end (oldest transaction)
-  addLast(transaction: Transaction): void {
-    const newNode = new ListNode(transaction);
-    if (this.tail === null) {
-      this.head = this.tail = newNode;
+  undo(): T | null {
+    if (this.top === null) return null;
+    const poppedData = this.top.data;
+    this.top = this.top.next;
+    this.size--;
+    return poppedData;
+  }
+
+  isEmpty(): boolean { return this.top === null; }
+
+  private removeBottom(): void {
+    if (!this.top) return;
+    let current = this.top;
+    while (current.next && current.next.next) current = current.next;
+    current.next = null;
+    this.size--;
+  }
+}
+
+// 3. MERGE SORT IMPLEMENTATION (For Sorting by Date)
+export function mergeSortTransactions(transactions: Transaction[]): Transaction[] {
+  if (transactions.length <= 1) return transactions;
+  const middle = Math.floor(transactions.length / 2);
+  const left = transactions.slice(0, middle);
+  const right = transactions.slice(middle);
+  return merge(mergeSortTransactions(left), mergeSortTransactions(right));
+}
+
+function merge(left: Transaction[], right: Transaction[]): Transaction[] {
+  let result: Transaction[] = [];
+  let leftIndex = 0; 
+  let rightIndex = 0;
+
+  while (leftIndex < left.length && rightIndex < right.length) {
+    const dateLeft = new Date(left[leftIndex].date + " " + left[leftIndex].time).getTime();
+    const dateRight = new Date(right[rightIndex].date + " " + right[rightIndex].time).getTime();
+
+    // Sort Descending (Newest First)
+    if (dateLeft > dateRight) {
+      result.push(left[leftIndex]);
+      leftIndex++;
     } else {
-      newNode.prev = this.tail;
-      this.tail.next = newNode;
-      this.tail = newNode;
+      result.push(right[rightIndex]);
+      rightIndex++;
     }
-    this.size++;
+  }
+  return result.concat(left.slice(leftIndex)).concat(right.slice(rightIndex));
+}
+
+// 4. BST IMPLEMENTATION (For Filtering by Amount)
+class BSTNode {
+  data: Transaction;
+  left: BSTNode | null = null;
+  right: BSTNode | null = null;
+  constructor(data: Transaction) { this.data = data; }
+}
+
+export class TransactionBST {
+  root: BSTNode | null = null;
+
+  insert(transaction: Transaction) {
+    this.root = this.insertRec(this.root, transaction);
   }
 
-  // Remove by ID
-  remove(id: string): Transaction | null {
-    let current = this.head;
-    while (current !== null) {
-      if (current.transaction.id === id) {
-        if (current.prev) current.prev.next = current.next;
-        if (current.next) current.next.prev = current.prev;
-        if (current === this.head) this.head = current.next;
-        if (current === this.tail) this.tail = current.prev;
-        this.size--;
-        return current.transaction;
-      }
-      current = current.next;
-    }
-    return null;
+  private insertRec(root: BSTNode | null, t: Transaction): BSTNode {
+    if (root === null) return new BSTNode(t);
+    if (t.amount < root.data.amount) root.left = this.insertRec(root.left, t);
+    else root.right = this.insertRec(root.right, t);
+    return root;
   }
 
-  // Convert to array
-  toArray(): Transaction[] {
+  inOrderTraversal(): Transaction[] {
     const result: Transaction[] = [];
-    let current = this.head;
-    while (current !== null) {
-      result.push(current.transaction);
-      current = current.next;
-    }
+    this.inOrderRec(this.root, result);
     return result;
   }
 
-  getSize(): number {
-    return this.size;
+  private inOrderRec(root: BSTNode | null, result: Transaction[]) {
+    if (root !== null) {
+      this.inOrderRec(root.left, result);
+      result.push(root.data);
+      this.inOrderRec(root.right, result);
+    }
   }
 }
