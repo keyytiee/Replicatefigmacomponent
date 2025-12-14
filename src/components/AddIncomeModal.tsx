@@ -50,18 +50,6 @@ function ConfirmButton({ onClick }: { onClick: () => void }) {
   );
 }
 
-function IconoirAttachment() {
-  return (
-    <div className="absolute left-[256px] size-[15px] top-[498px]" data-name="iconoir:attachment">
-      <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 15 15">
-        <g id="iconoir:attachment">
-          <path d={svgPaths.p79df8d2} id="Vector" stroke="var(--stroke-0, black)" strokeLinecap="round" strokeLinejoin="round" strokeOpacity="0.5" strokeWidth="1.5" />
-        </g>
-      </svg>
-    </div>
-  );
-}
-
 export default function AddIncomeModal({ isOpen, onClose, balances, cardType, onAddIncome }: AddIncomeModalProps) {
   const [amount, setAmount] = useState('');
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
@@ -71,7 +59,9 @@ export default function AddIncomeModal({ isOpen, onClose, balances, cardType, on
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
   const [translateX, setTranslateX] = useState(0);
+  const [attachedImage, setAttachedImage] = useState<string | undefined>(undefined);
   const cardRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const cards: Array<'bank' | 'cash' | 'savings'> = ['bank', 'cash', 'savings'];
 
@@ -83,6 +73,7 @@ export default function AddIncomeModal({ isOpen, onClose, balances, cardType, on
       setTitle('');
       setShowDescriptionModal(false);
       setTranslateX(0);
+      setAttachedImage(undefined);
     }
   }, [isOpen]);
 
@@ -143,6 +134,41 @@ export default function AddIncomeModal({ isOpen, onClose, balances, cardType, on
 
     onAddIncome(income);
     onClose();
+  };
+
+  const handleAttachImage = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Check file size (limit to 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        alert('Image size should be less than 5MB');
+        return;
+      }
+
+      // Check file type
+      if (!file.type.startsWith('image/')) {
+        alert('Please select an image file');
+        return;
+      }
+
+      // Convert to base64
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setAttachedImage(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setAttachedImage(undefined);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   // Swipe handlers
@@ -300,9 +326,59 @@ export default function AddIncomeModal({ isOpen, onClose, balances, cardType, on
       )}
       
       {/* Attach Image Button */}
-      <div className="absolute bg-[#d9d9d9] h-[20px] left-[242px] rounded-[10px] top-[496px] w-[113px] cursor-pointer hover:bg-[#c9c9c9] transition-colors" />
-      <p className="absolute font-['Inter:Italic',sans-serif] font-normal h-[23px] italic leading-[normal] left-[272px] text-[11px] text-[rgba(0,0,0,0.5)] top-[499px] tracking-[-0.11px] w-[259px] pointer-events-none">Attach Image</p>
-      <IconoirAttachment />
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        onChange={handleImageChange}
+        className="hidden"
+      />
+      <button 
+        className="absolute bg-[#d9d9d9] h-[20px] left-[242px] rounded-[10px] top-[496px] w-[113px] cursor-pointer hover:bg-[#c9c9c9] transition-colors z-10"
+        onClick={handleAttachImage}
+      />
+      {/* Paperclip Icon - positioned to the left of text */}
+      <div className="absolute left-[252px] size-[11px] top-[500.5px] pointer-events-none z-10" data-name="iconoir:attachment">
+        <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 15 15">
+          <g id="iconoir:attachment">
+            <path d={svgPaths.p79df8d2} id="Vector" stroke="rgba(0,0,0,0.5)" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
+          </g>
+        </svg>
+      </div>
+      <p className="absolute font-['Inter:Italic',sans-serif] font-normal h-[23px] italic leading-[normal] left-[271px] text-[11px] text-[rgba(0,0,0,0.5)] top-[499px] tracking-[-0.11px] w-[259px] pointer-events-none z-10">
+        {attachedImage ? 'Image attached ✓' : 'Attach Image'}
+      </p>
+      
+      {/* Image Preview Section */}
+      {attachedImage && (
+        <div className="absolute left-[80px] top-[520px] w-[274px] flex items-start gap-2 z-20">
+          <div className="relative">
+            <img 
+              src={attachedImage} 
+              alt="Preview" 
+              className="w-[80px] h-[80px] object-cover rounded-[5px] border border-[#303030]"
+            />
+            <button
+              onClick={handleRemoveImage}
+              className="absolute -top-2 -right-2 w-5 h-5 bg-[#303030] text-white rounded-full flex items-center justify-center hover:bg-[#505050] transition-colors cursor-pointer"
+              title="Remove image"
+            >
+              ×
+            </button>
+          </div>
+          <div className="flex flex-col gap-1">
+            <p className="font-['Inter:Regular',sans-serif] text-[9px] text-[rgba(0,0,0,0.7)]">
+              Image attached
+            </p>
+            <button
+              onClick={handleAttachImage}
+              className="font-['Inter:Regular',sans-serif] text-[9px] text-[#303030] underline hover:opacity-70 transition-opacity cursor-pointer bg-transparent border-none"
+            >
+              Replace
+            </button>
+          </div>
+        </div>
+      )}
       
       <ConfirmButton onClick={handleConfirm} />
       

@@ -12,6 +12,7 @@ export interface Transaction {
   cardType: 'bank' | 'cash' | 'savings';
   date: string;
   time: string;
+  attachedImage?: string; // base64 data URL or image URL
 }
 
 export interface Income {
@@ -22,6 +23,7 @@ export interface Income {
   cardType: 'bank' | 'cash' | 'savings';
   date: string;
   time: string;
+  attachedImage?: string; // base64 data URL or image URL
 }
 
 export interface CardBalances {
@@ -32,6 +34,7 @@ export interface CardBalances {
 
 export default function App() {
   const [currentScreen, setCurrentScreen] = useState<"splash" | "dashboard">("splash");
+  const [isDarkMode, setIsDarkMode] = useState(false);
   const [balances, setBalances] = useState<CardBalances>({
     bank: 5000.00,
     cash: 2000.00,
@@ -96,6 +99,187 @@ export default function App() {
       amount: 300,
       cardType: "cash",
       date: "November 27, 2025",
+      time: "8:00 PM"
+    },
+    // Current week transactions (Dec 9-15, 2025) for Weekly Report graphs
+    {
+      id: "w1",
+      category: "Transportation",
+      title: "Grab Ride",
+      description: "Home to Office",
+      amount: 120,
+      cardType: "cash",
+      date: "December 9, 2025",
+      time: "8:00 AM"
+    },
+    {
+      id: "w2",
+      category: "Food & Grocery",
+      title: "Breakfast",
+      description: "McDonald's",
+      amount: 150,
+      cardType: "bank",
+      date: "December 9, 2025",
+      time: "9:00 AM"
+    },
+    {
+      id: "w3",
+      category: "Transportation",
+      title: "Taxi",
+      description: "Office to Mall",
+      amount: 200,
+      cardType: "cash",
+      date: "December 10, 2025",
+      time: "6:00 PM"
+    },
+    {
+      id: "w4",
+      category: "Food & Grocery",
+      title: "Grocery Shopping",
+      description: "Puregold",
+      amount: 380,
+      cardType: "bank",
+      date: "December 10, 2025",
+      time: "7:00 PM"
+    },
+    {
+      id: "w5",
+      category: "Leisure",
+      title: "Movie Night",
+      description: "Ayala Cinema",
+      amount: 450,
+      cardType: "bank",
+      date: "December 10, 2025",
+      time: "8:00 PM"
+    },
+    {
+      id: "w6",
+      category: "Transportation",
+      title: "Gas",
+      description: "Petron Station",
+      amount: 350,
+      cardType: "bank",
+      date: "December 11, 2025",
+      time: "10:00 AM"
+    },
+    {
+      id: "w7",
+      category: "Food & Grocery",
+      title: "Lunch",
+      description: "Jollibee",
+      amount: 200,
+      cardType: "cash",
+      date: "December 11, 2025",
+      time: "12:30 PM"
+    },
+    {
+      id: "w8",
+      category: "Healthcare",
+      title: "Pharmacy",
+      description: "Mercury Drug",
+      amount: 250,
+      cardType: "bank",
+      date: "December 11, 2025",
+      time: "3:00 PM"
+    },
+    {
+      id: "w9",
+      category: "Transportation",
+      title: "Uber",
+      description: "Lunch Meeting",
+      amount: 180,
+      cardType: "cash",
+      date: "December 12, 2025",
+      time: "11:00 AM"
+    },
+    {
+      id: "w10",
+      category: "Food & Grocery",
+      title: "Dinner",
+      description: "Max's Restaurant",
+      amount: 520,
+      cardType: "bank",
+      date: "December 12, 2025",
+      time: "7:30 PM"
+    },
+    {
+      id: "w11",
+      category: "Utilities",
+      title: "Internet Bill",
+      description: "PLDT Payment",
+      amount: 1500,
+      cardType: "bank",
+      date: "December 12, 2025",
+      time: "2:00 PM"
+    },
+    {
+      id: "w12",
+      category: "Transportation",
+      title: "Parking Fee",
+      description: "SM Mall Parking",
+      amount: 80,
+      cardType: "cash",
+      date: "December 13, 2025",
+      time: "10:00 AM"
+    },
+    {
+      id: "w13",
+      category: "Food & Grocery",
+      title: "Snacks",
+      description: "7-Eleven",
+      amount: 150,
+      cardType: "cash",
+      date: "December 13, 2025",
+      time: "11:00 AM"
+    },
+    {
+      id: "w14",
+      category: "Leisure",
+      title: "Coffee",
+      description: "Starbucks",
+      amount: 180,
+      cardType: "bank",
+      date: "December 13, 2025",
+      time: "2:00 PM"
+    },
+    {
+      id: "w15",
+      category: "Education",
+      title: "Online Course",
+      description: "Udemy",
+      amount: 800,
+      cardType: "bank",
+      date: "December 13, 2025",
+      time: "4:00 PM"
+    },
+    {
+      id: "w16",
+      category: "Bills",
+      title: "Credit Card",
+      description: "BDO Monthly Payment",
+      amount: 2500,
+      cardType: "bank",
+      date: "December 14, 2025",
+      time: "9:00 AM"
+    },
+    {
+      id: "w17",
+      category: "Miscellaneous",
+      title: "Pet Supplies",
+      description: "Cat Food & Treats",
+      amount: 450,
+      cardType: "cash",
+      date: "December 15, 2025",
+      time: "10:00 AM"
+    },
+    {
+      id: "w18",
+      category: "Leisure",
+      title: "Gaming",
+      description: "Steam Game Purchase",
+      amount: 300,
+      cardType: "bank",
+      date: "December 15, 2025",
       time: "8:00 PM"
     }
   ]);
@@ -346,6 +530,8 @@ export default function App() {
             undoMessage={undoMessage}
             onUndo={handleUndo}
             onCloseUndoToast={() => setShowUndoToast(false)}
+            isDarkMode={isDarkMode}
+            onToggleDarkMode={setIsDarkMode}
           />
         </div>
       </div>

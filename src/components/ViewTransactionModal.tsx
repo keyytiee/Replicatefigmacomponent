@@ -13,6 +13,7 @@ interface ViewTransactionModalProps {
   onClose: () => void;
   onDelete?: (id: string) => void;
   onEdit?: (transaction: Transaction) => void;
+  isDarkMode?: boolean;
 }
 
 function getCategoryIcon(category: string) {
@@ -80,28 +81,32 @@ function getCategoryIcon(category: string) {
   }
 }
 
-function Sidebar() {
+function Sidebar({ isDarkMode }: { isDarkMode?: boolean }) {
+  const strokeColor = isDarkMode ? '#FFFFFF' : '#303030';
+  const fillColor = isDarkMode ? '#FFFFFF' : '#303030';
+  const polygonFill = isDarkMode ? '#FFFFFF' : '#D9D9D9';
+  
   return (
     <div className="absolute h-[133px] left-[419px] top-[375px] w-[21px]" data-name="Sidebar">
       <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 21 133">
         <g id="Sidebar">
-          <rect fill="var(--fill-0, #303030)" height="26" id="Sidebar_2" rx="6.5" stroke="var(--stroke-0, #303030)" width="20" x="0.5" y="54.5" />
-          <line id="Line 10" stroke="var(--stroke-0, #303030)" strokeLinecap="round" strokeWidth="5" x1="7.5" x2="7.5" y1="2.5" y2="130.5" />
-          <path d={svgPaths.p25a9b40} fill="var(--fill-0, #D9D9D9)" id="Polygon 1" stroke="var(--stroke-0, #303030)" />
+          <rect fill={fillColor} height="26" id="Sidebar_2" rx="6.5" stroke={strokeColor} width="20" x="0.5" y="54.5" />
+          <line id="Line 10" stroke={strokeColor} strokeLinecap="round" strokeWidth="5" x1="7.5" x2="7.5" y1="2.5" y2="130.5" />
+          <path d={svgPaths.p25a9b40} fill={polygonFill} id="Polygon 1" stroke={strokeColor} />
         </g>
       </svg>
     </div>
   );
 }
 
-function ReturnButton({ onClick }: { onClick: () => void }) {
+function ReturnButton({ onClick, isDarkMode }: { onClick: () => void; isDarkMode?: boolean }) {
   return (
-    <div className="absolute h-[21.998px] left-[35px] top-[53px] w-[9px] cursor-pointer" data-name="Return Button" onClick={onClick}>
+    <div className="absolute h-[21.998px] left-[35px] top-[53px] w-[9px] cursor-pointer hover:opacity-70 transition-opacity" data-name="Return Button" onClick={onClick}>
       <div className="absolute inset-[0_-8.6%_-2.67%_0]">
         <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 10 23">
           <g id="Return Button">
-            <line id="Line 11" stroke="var(--stroke-0, black)" x1="9.38698" x2="0.386979" y1="0.316619" y2="11.3166" />
-            <line id="Line 12" stroke="var(--stroke-0, black)" x1="8.5954" x2="0.595762" y1="22.2925" y2="11.2941" />
+            <line id="Line 11" stroke={isDarkMode ? '#FFFFFF' : 'black'} x1="9.38698" x2="0.386979" y1="0.316619" y2="11.3166" />
+            <line id="Line 12" stroke={isDarkMode ? '#FFFFFF' : 'black'} x1="8.5954" x2="0.595762" y1="22.2925" y2="11.2941" />
           </g>
         </svg>
       </div>
@@ -131,7 +136,7 @@ function DeleteButton({ onClick }: { onClick: () => void }) {
   );
 }
 
-export default function ViewTransactionModal({ transaction, isOpen, onClose, onDelete, onEdit }: ViewTransactionModalProps) {
+export default function ViewTransactionModal({ transaction, isOpen, onClose, onDelete, onEdit, isDarkMode }: ViewTransactionModalProps) {
   if (!transaction) return null;
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -156,7 +161,7 @@ export default function ViewTransactionModal({ transaction, isOpen, onClose, onD
     <>
       {/* Backdrop */}
       <div 
-        className={`absolute inset-0 bg-black transition-opacity duration-300 z-40 ${
+        className={`absolute inset-0 bg-black transition-opacity duration-300 z-[95] ${
           isOpen ? 'opacity-50' : 'opacity-0 pointer-events-none'
         }`}
         onClick={onClose}
@@ -164,37 +169,37 @@ export default function ViewTransactionModal({ transaction, isOpen, onClose, onD
       
       {/* Modal */}
       <div 
-        className={`absolute left-0 top-0 w-[428px] h-[926px] z-50 transition-transform duration-500 ease-out ${
+        className={`absolute left-0 top-0 w-[428px] h-[926px] z-[100] transition-transform duration-500 ease-out ${
           isOpen ? 'translate-y-0' : 'translate-y-full'
         }`}
       >
-        <div className="bg-white relative size-full" data-name="View Transac">
+        <div className={`relative size-full transition-colors duration-300 ${isDarkMode ? 'bg-[#1E1E1E]' : 'bg-white'}`} data-name="View Transac">
           <div className="absolute h-[926px] left-0 opacity-10 top-0 w-[428px]" data-name="Untitled design (4) 1">
             <img alt="" className="absolute inset-0 max-w-none object-50%-50% object-cover pointer-events-none size-full" src={imgUntitledDesign41} />
           </div>
           <div className="absolute bg-[rgba(217,217,217,0.5)] border border-black border-solid h-[310px] left-[32px] rounded-[12px] shadow-[4px_4px_0px_0px_#000000] top-[119px] w-[363px]" />
-          <Sidebar />
-          <ReturnButton onClick={onClose} />
-          <p className="absolute font-['Plus_Jakarta_Sans:ExtraBold',sans-serif] font-extrabold h-[20px] leading-[normal] left-[213.5px] text-[#303030] text-[20px] text-center top-[49px] tracking-[-0.2px] translate-x-[-50%] w-[167px]">Transaction</p>
+          <Sidebar isDarkMode={isDarkMode} />
+          <ReturnButton onClick={onClose} isDarkMode={isDarkMode} />
+          <p className={`absolute font-['Plus_Jakarta_Sans:ExtraBold',sans-serif] font-extrabold h-[20px] leading-[normal] left-[213.5px] text-[20px] text-center top-[49px] tracking-[-0.2px] translate-x-[-50%] w-[167px] ${isDarkMode ? 'text-white' : 'text-[#303030]'}`}>Transaction</p>
           <div className="absolute bg-[rgba(217,217,217,0.5)] border border-black border-solid h-[58px] left-[32px] rounded-[12px] shadow-[4px_4px_0px_0px_#000000] top-[503px] w-[363px]" />
           <div className="absolute bg-[rgba(48,48,48,0.3)] h-[36px] left-[45px] rounded-[10px] top-[514px] w-[76px] flex items-center justify-center">
             <div className="w-[20px] h-[20px]">
               {getCategoryIcon(transaction.category)}
             </div>
           </div>
-          <div className="absolute font-['Plus_Jakarta_Sans:SemiBold',sans-serif] font-semibold h-[18px] leading-[normal] left-[132px] text-[18px] text-black top-[520px] tracking-[-0.18px] w-[177px]">
+          <div className={`absolute font-['Plus_Jakarta_Sans:SemiBold',sans-serif] font-semibold h-[18px] leading-[normal] left-[132px] text-[18px] top-[520px] tracking-[-0.18px] w-[177px] ${isDarkMode ? 'text-white' : 'text-black'}`}>
             <p className="mb-0">{transaction.title || transaction.description}</p>
             <p>&nbsp;</p>
           </div>
-          <p className="absolute font-['Plus_Jakarta_Sans:SemiBold',sans-serif] font-semibold leading-[normal] right-[45px] text-[18px] text-black top-[520px] tracking-[-0.18px] text-right">-₱{transaction.amount.toFixed(2)}</p>
-          <div className="absolute font-['Inter:Regular',sans-serif] font-normal leading-[normal] left-[38px] not-italic text-[0px] text-black top-[443px] tracking-[-0.16px] w-[259px]">
+          <p className={`absolute font-['Plus_Jakarta_Sans:SemiBold',sans-serif] font-semibold leading-[normal] right-[45px] text-[18px] top-[520px] tracking-[-0.18px] text-right ${isDarkMode ? 'text-white' : 'text-black'}`}>-₱{transaction.amount.toFixed(2)}</p>
+          <div className={`absolute font-['Inter:Regular',sans-serif] font-normal leading-[normal] left-[38px] not-italic text-[0px] top-[443px] tracking-[-0.16px] w-[259px] ${isDarkMode ? 'text-white' : 'text-black'}`}>
             <p className="font-['Inter:Bold',sans-serif] font-bold mb-0 text-[16px]">{transaction.date}</p>
             <p className="text-[11px]">{transaction.time}</p>
           </div>
           <div className="absolute bg-[rgba(217,217,217,0.3)] border border-[rgba(0,0,0,0.3)] border-solid h-[174px] left-[32px] rounded-[10px] top-[585px] w-[367px]" />
-          <p className="absolute font-['Inter:Italic',sans-serif] font-normal h-[21px] italic leading-[normal] left-[54px] text-[11px] text-[rgba(0,0,0,0.5)] top-[600px] tracking-[-0.11px] w-[307px]">Description</p>
+          <p className={`absolute font-['Inter:Italic',sans-serif] font-normal h-[21px] italic leading-[normal] left-[54px] text-[11px] top-[600px] tracking-[-0.11px] w-[307px] ${isDarkMode ? 'text-white/70' : 'text-[rgba(0,0,0,0.5)]'}`}>Description</p>
           {transaction.description && (
-            <p className="absolute font-['Inter:Regular',sans-serif] font-normal left-[54px] text-[12px] text-black top-[625px] w-[307px] leading-relaxed">
+            <p className={`absolute font-['Inter:Regular',sans-serif] font-normal left-[54px] text-[12px] top-[625px] w-[307px] leading-relaxed ${isDarkMode ? 'text-white' : 'text-black'}`}>
               {transaction.description}
             </p>
           )}
@@ -202,7 +207,11 @@ export default function ViewTransactionModal({ transaction, isOpen, onClose, onD
           <DeleteButton onClick={handleDelete} />
           <div className="absolute h-[286px] left-[45px] rounded-[12px] top-[130px] w-[341px]" data-name="image 10">
             <div className="absolute inset-0 overflow-hidden pointer-events-none rounded-[12px]">
-              <img alt="" className="absolute h-full left-[-12.07%] max-w-none top-0 w-[160.13%]" src={imgImage10} />
+              {transaction.attachedImage ? (
+                <img alt="Transaction attachment" className="absolute inset-0 w-full h-full object-cover" src={transaction.attachedImage} />
+              ) : (
+                <img alt="" className="absolute h-full left-[-12.07%] max-w-none top-0 w-[160.13%]" src={imgImage10} />
+              )}
             </div>
           </div>
         </div>

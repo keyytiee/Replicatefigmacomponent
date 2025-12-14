@@ -10,6 +10,7 @@ interface NavigationSidebarProps {
   onAnalyticsClick?: () => void;
   onHomeClick?: () => void;
   onSearchClick?: () => void;
+  isDarkMode?: boolean;
 }
 
 function MaterialSymbolsLightFileExportOutlineRounded() {
@@ -24,7 +25,7 @@ function MaterialSymbolsLightFileExportOutlineRounded() {
   );
 }
 
-export default function NavigationSidebar({ isOpen, onClose, currentScreen = "Home", onSettingsClick, onExportClick, onAnalyticsClick, onHomeClick, onSearchClick }: NavigationSidebarProps) {
+export default function NavigationSidebar({ isOpen, onClose, currentScreen = "Home", onSettingsClick, onExportClick, onAnalyticsClick, onHomeClick, onSearchClick, isDarkMode }: NavigationSidebarProps) {
   const [isAnimating, setIsAnimating] = useState(false);
 
   useEffect(() => {
@@ -91,7 +92,7 @@ export default function NavigationSidebar({ isOpen, onClose, currentScreen = "Ho
         data-name="Sidebar"
       >
         {/* Background rounded rect - left: 346-246=100, top: 250-250=0 */}
-        <div className="absolute bg-[#303030] h-[395px] left-[100px] rounded-[40px] shadow-[4px_4px_0px_0px_#000000] top-0 w-[145px]" />
+        <div className="absolute h-[395px] left-[100px] rounded-[40px] shadow-[4px_4px_0px_0px_#000000] top-0 w-[145px] bg-[#303030]" />
         
         {/* Clickable Export button area */}
         <button
@@ -161,23 +162,29 @@ export default function NavigationSidebar({ isOpen, onClose, currentScreen = "Ho
         </div>
         
         {/* Export icon - left: 371-246=125, top: 293-250=43 */}
-        <MaterialSymbolsLightFileExportOutlineRounded />
+        <div className="absolute left-[125px] size-[35px] top-[43px]" data-name="material-symbols-light:file-export-outline-rounded">
+          <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 35 35">
+            <g id="material-symbols-light:file-export-outline-rounded">
+              <path d={svgPaths.p15a70c00} fill="white" fillOpacity="0.8" id="Vector" />
+            </g>
+          </svg>
+        </div>
         
         {/* Labels - exact positions from Figma relative to container */}
         {/* Home - left: 302-246=56, top: 429-250=179 */}
-        <p className="absolute font-['Plus_Jakarta_Sans:ExtraBold',sans-serif] font-extrabold h-[20px] leading-[normal] left-[56px] text-[18px] text-center text-white top-[179px] tracking-[-0.18px] translate-x-[-50%] w-[64px] pointer-events-none">Home</p>
+        <p className="absolute font-['Plus_Jakarta_Sans:ExtraBold',sans-serif] font-extrabold h-[20px] leading-[normal] left-[56px] text-[18px] text-center top-[179px] tracking-[-0.18px] translate-x-[-50%] w-[64px] pointer-events-none text-white">Home</p>
         
         {/* Search - left: 297-246=51, top: 499-250=249 */}
-        <p className="absolute font-['Plus_Jakarta_Sans:ExtraBold',sans-serif] font-extrabold h-[20px] leading-[normal] left-[51px] text-[18px] text-center text-white top-[249px] tracking-[-0.18px] translate-x-[-50%] w-[76px] pointer-events-none">Search</p>
+        <p className="absolute font-['Plus_Jakarta_Sans:ExtraBold',sans-serif] font-extrabold h-[20px] leading-[normal] left-[51px] text-[18px] text-center top-[249px] tracking-[-0.18px] translate-x-[-50%] w-[76px] pointer-events-none text-white">Search</p>
         
         {/* Settings - left: 294-246=48, top: 578-250=328 */}
-        <p className="absolute font-['Plus_Jakarta_Sans:ExtraBold',sans-serif] font-extrabold h-[20px] leading-[normal] left-[48px] text-[18px] text-center text-white top-[328px] tracking-[-0.18px] translate-x-[-50%] w-[76px] pointer-events-none">Settings</p>
+        <p className="absolute font-['Plus_Jakarta_Sans:ExtraBold',sans-serif] font-extrabold h-[20px] leading-[normal] left-[48px] text-[18px] text-center top-[328px] tracking-[-0.18px] translate-x-[-50%] w-[76px] pointer-events-none text-white">Settings</p>
         
         {/* Analytics - left: 289-246=43, top: 365-250=115 */}
-        <p className="absolute font-['Plus_Jakarta_Sans:ExtraBold',sans-serif] font-extrabold h-[20px] leading-[normal] left-[43px] text-[18px] text-center text-white top-[115px] tracking-[-0.18px] translate-x-[-50%] w-[86px] pointer-events-none">Analytics</p>
+        <p className="absolute font-['Plus_Jakarta_Sans:ExtraBold',sans-serif] font-extrabold h-[20px] leading-[normal] left-[43px] text-[18px] text-center top-[115px] tracking-[-0.18px] translate-x-[-50%] w-[86px] pointer-events-none text-white">Analytics</p>
         
         {/* Export - left: 302.5-246=56.5, top: 297-250=47 */}
-        <p className="absolute font-['Plus_Jakarta_Sans:ExtraBold',sans-serif] font-extrabold h-[20px] leading-[normal] left-[56.5px] text-[18px] text-center text-white top-[47px] tracking-[-0.18px] translate-x-[-50%] w-[59px] pointer-events-none">Export</p>
+        <p className="absolute font-['Plus_Jakarta_Sans:ExtraBold',sans-serif] font-extrabold h-[20px] leading-[normal] left-[56.5px] text-[18px] text-center top-[47px] tracking-[-0.18px] translate-x-[-50%] w-[59px] pointer-events-none text-white">Export</p>
       </div>
     </>
   );

@@ -193,7 +193,7 @@ export default function EditIncomeModal({ isOpen, onClose, income, balances, onE
 
   return (
     <>
-      <div className="absolute inset-0 bg-white z-[70]" data-name="Edit Income">
+      <div className="absolute inset-0 bg-white z-[105]" data-name="Edit Income">
         <div className="absolute h-[926px] left-0 opacity-10 top-0 w-[428px]" data-name="Untitled design (4) 1">
           <img alt="" className="absolute inset-0 max-w-none object-50%-50% object-cover pointer-events-none size-full" src={imgUntitledDesign41} />
         </div>

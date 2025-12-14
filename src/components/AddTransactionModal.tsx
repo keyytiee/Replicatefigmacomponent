@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import svgPaths from "../imports/svg-add-transaction";
 import imgUntitledDesign41 from "figma:asset/0f43c782522af7290a29a6e4387b4648c9fd1c0c.png";
+import exampleAttachImage from 'figma:asset/f42f3844a928587e872ecc2838c5da07f53c8ec6.png';
 import DescriptionModal from "./DescriptionModal";
 import PawPrint from "./PawPrint";
 
@@ -9,7 +10,7 @@ interface AddTransactionModalProps {
   onClose: () => void;
   cardType: 'bank' | 'cash' | 'savings';
   currentBalance: number;
-  onAddTransaction: (transaction: { category: string; title: string; description: string; amount: number; cardType: 'bank' | 'cash' | 'savings'; date: string; time: string }) => void;
+  onAddTransaction: (transaction: { category: string; title: string; description: string; amount: number; cardType: 'bank' | 'cash' | 'savings'; date: string; time: string; attachedImage?: string }) => void;
   editMode?: boolean;
   existingTransaction?: {
     id: string;
@@ -20,8 +21,9 @@ interface AddTransactionModalProps {
     cardType: 'bank' | 'cash' | 'savings';
     date: string;
     time: string;
+    attachedImage?: string;
   };
-  onEditTransaction?: (id: string, transaction: { category: string; title: string; description: string; amount: number; cardType: 'bank' | 'cash' | 'savings'; date: string; time: string }) => void;
+  onEditTransaction?: (id: string, transaction: { category: string; title: string; description: string; amount: number; cardType: 'bank' | 'cash' | 'savings'; date: string; time: string; attachedImage?: string }) => void;
 }
 
 type Category = 'Food & Grocery' | 'Transportation' | 'Bills' | 'Utilities' | 'Healthcare' | 'Leisure' | 'Education' | 'Miscellaneous';
@@ -78,6 +80,8 @@ export default function AddTransactionModal({ isOpen, onClose, cardType, current
   const [description, setDescription] = useState('');
   const [title, setTitle] = useState('');
   const [showDescriptionModal, setShowDescriptionModal] = useState(false);
+  const [attachedImage, setAttachedImage] = useState<string | undefined>(undefined);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!isOpen) {
@@ -87,12 +91,14 @@ export default function AddTransactionModal({ isOpen, onClose, cardType, current
       setDescription('');
       setTitle('');
       setShowDescriptionModal(false);
+      setAttachedImage(undefined);
     } else if (editMode && existingTransaction) {
       // Populate form with existing transaction data
       setAmount(existingTransaction.amount.toString());
       setSelectedCategory(existingTransaction.category as Category);
       setDescription(existingTransaction.description);
       setTitle(existingTransaction.title);
+      setAttachedImage(existingTransaction.attachedImage);
     }
   }, [isOpen, editMode, existingTransaction]);
 
@@ -124,7 +130,8 @@ export default function AddTransactionModal({ isOpen, onClose, cardType, current
       title,
       cardType,
       date,
-      time
+      time,
+      attachedImage
     };
     if (editMode && existingTransaction && onEditTransaction) {
       onEditTransaction(existingTransaction.id, transaction);
@@ -161,8 +168,36 @@ export default function AddTransactionModal({ isOpen, onClose, cardType, current
     return 'white';
   };
 
+  const handleAttachImage = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Check file size (limit to 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        alert('Image size should be less than 5MB');
+        return;
+      }
+
+      // Check file type
+      if (!file.type.startsWith('image/')) {
+        alert('Please select an image file');
+        return;
+      }
+
+      // Convert to base64
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setAttachedImage(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   return (
-    <div className="absolute inset-0 bg-white z-[70]" data-name="Add Transac">
+    <div className="absolute inset-0 bg-white z-[105]" data-name="Add Transac">
       <div className="absolute h-[926px] left-[-2px] opacity-10 top-0 w-[428px]" data-name="Untitled design (4) 1">
         <img alt="" className="absolute inset-0 max-w-none object-50%-50% object-cover pointer-events-none size-full" src={imgUntitledDesign41} />
       </div>
@@ -381,8 +416,20 @@ export default function AddTransactionModal({ isOpen, onClose, cardType, current
       )}
       
       {/* Attach Image Button */}
-      <div className="absolute bg-[#d9d9d9] h-[20px] left-[244px] rounded-[10px] top-[778px] w-[113px] cursor-pointer hover:bg-[#c9c9c9] transition-colors" />
-      <p className="absolute font-['Inter:Italic',sans-serif] font-normal h-[23px] italic leading-[normal] left-[274px] text-[11px] text-[rgba(0,0,0,0.5)] top-[781px] tracking-[-0.11px] w-[259px] pointer-events-none">Attach Image</p>
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        onChange={handleImageChange}
+        className="hidden"
+      />
+      <button 
+        className="absolute bg-[#d9d9d9] h-[20px] left-[244px] rounded-[10px] top-[778px] w-[113px] cursor-pointer hover:bg-[#c9c9c9] transition-colors"
+        onClick={handleAttachImage}
+      />
+      <p className="absolute font-['Inter:Italic',sans-serif] font-normal h-[23px] italic leading-[normal] left-[274px] text-[11px] text-[rgba(0,0,0,0.5)] top-[781px] tracking-[-0.11px] w-[259px] pointer-events-none">
+        {attachedImage ? 'Image attached ✓' : 'Attach Image'}
+      </p>
       <IconoirAttachment />
       
       <ConfirmButton onClick={handleConfirm} />

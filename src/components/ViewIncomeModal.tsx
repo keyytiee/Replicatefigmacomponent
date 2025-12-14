@@ -13,30 +13,35 @@ interface ViewIncomeModalProps {
   onClose: () => void;
   onDelete?: (id: string) => void;
   onEdit?: (income: Income) => void;
+  isDarkMode?: boolean;
 }
 
-function Sidebar() {
+function Sidebar({ isDarkMode }: { isDarkMode?: boolean }) {
+  const strokeColor = isDarkMode ? '#FFFFFF' : '#303030';
+  const fillColor = isDarkMode ? '#FFFFFF' : '#303030';
+  const polygonFill = isDarkMode ? '#FFFFFF' : '#D9D9D9';
+  
   return (
     <div className="absolute h-[133px] left-[419px] top-[375px] w-[21px]" data-name="Sidebar">
       <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 21 133">
         <g id="Sidebar">
-          <rect fill="var(--fill-0, #303030)" height="26" id="Rectangle 59" rx="6.5" stroke="var(--stroke-0, #303030)" width="20" x="0.5" y="54.5" />
-          <line id="Line 10" stroke="var(--stroke-0, #303030)" strokeLinecap="round" strokeWidth="5" x1="7.5" x2="7.5" y1="2.5" y2="130.5" />
-          <path d={svgPaths.p25a9b40} fill="var(--fill-0, #D9D9D9)" id="Polygon 1" stroke="var(--stroke-0, #303030)" />
+          <rect fill={fillColor} height="26" id="Rectangle 59" rx="6.5" stroke={strokeColor} width="20" x="0.5" y="54.5" />
+          <line id="Line 10" stroke={strokeColor} strokeLinecap="round" strokeWidth="5" x1="7.5" x2="7.5" y1="2.5" y2="130.5" />
+          <path d={svgPaths.p25a9b40} fill={polygonFill} id="Polygon 1" stroke={strokeColor} />
         </g>
       </svg>
     </div>
   );
 }
 
-function ReturnButton({ onClick }: { onClick: () => void }) {
+function ReturnButton({ onClick, isDarkMode }: { onClick: () => void; isDarkMode?: boolean }) {
   return (
     <div className="absolute h-[21.998px] left-[35px] top-[53px] w-[9px] cursor-pointer hover:opacity-70 transition-opacity" data-name="Return Button" onClick={onClick}>
       <div className="absolute inset-[0_-8.6%_-2.67%_0]">
         <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 10 23">
           <g id="Return Button">
-            <line id="Line 11" stroke="var(--stroke-0, black)" x1="9.38698" x2="0.386979" y1="0.316619" y2="11.3166" />
-            <line id="Line 12" stroke="var(--stroke-0, black)" x1="8.5954" x2="0.595762" y1="22.2925" y2="11.2941" />
+            <line id="Line 11" stroke={isDarkMode ? '#FFFFFF' : 'black'} x1="9.38698" x2="0.386979" y1="0.316619" y2="11.3166" />
+            <line id="Line 12" stroke={isDarkMode ? '#FFFFFF' : 'black'} x1="8.5954" x2="0.595762" y1="22.2925" y2="11.2941" />
           </g>
         </svg>
       </div>
@@ -72,7 +77,7 @@ function DeleteButton({ onClick }: { onClick: () => void }) {
   );
 }
 
-export default function ViewIncomeModal({ income, isOpen, onClose, onDelete, onEdit }: ViewIncomeModalProps) {
+export default function ViewIncomeModal({ income, isOpen, onClose, onDelete, onEdit, isDarkMode }: ViewIncomeModalProps) {
   const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
 
   if (!isOpen || !income) return null;
@@ -97,7 +102,8 @@ export default function ViewIncomeModal({ income, isOpen, onClose, onDelete, onE
 
   return (
     <>
-      <div className="absolute inset-0 bg-white z-50" data-name="View Income">
+      <div className="absolute inset-0 bg-black bg-opacity-50 z-[95]" onClick={onClose}></div>
+      <div className={`absolute inset-0 z-[100] transition-colors duration-300 ${isDarkMode ? 'bg-[#1E1E1E]' : 'bg-white'}`} data-name="View Income">
         <div className="absolute h-[924px] left-0 opacity-10 top-0 w-[427px]" data-name="Untitled design (4) 1">
           <img alt="" className="absolute inset-0 max-w-none object-50%-50% object-cover pointer-events-none size-full" src={imgUntitledDesign41} />
         </div>
@@ -105,10 +111,10 @@ export default function ViewIncomeModal({ income, isOpen, onClose, onDelete, onE
         {/* Top section with rounded border containing image */}
         <div className="absolute bg-[rgba(217,217,217,0.5)] border border-black border-solid h-[310px] left-[32px] rounded-[12px] shadow-[4px_4px_0px_0px_black] top-[119px] w-[363px]" />
         
-        <Sidebar />
-        <ReturnButton onClick={onClose} />
+        <Sidebar isDarkMode={isDarkMode} />
+        <ReturnButton onClick={onClose} isDarkMode={isDarkMode} />
         
-        <p className="absolute font-['Plus_Jakarta_Sans:ExtraBold',sans-serif] font-extrabold h-[20px] leading-[normal] left-[213.5px] text-[#303030] text-[20px] text-center top-[49px] tracking-[-0.2px] translate-x-[-50%] w-[167px]">Income</p>
+        <p className={`absolute font-['Plus_Jakarta_Sans:ExtraBold',sans-serif] font-extrabold h-[20px] leading-[normal] left-[213.5px] text-[20px] text-center top-[49px] tracking-[-0.2px] translate-x-[-50%] w-[167px] ${isDarkMode ? 'text-white' : 'text-[#303030]'}`}>Income</p>
         
         {/* Income transaction item */}
         <div className="absolute bg-[rgba(217,217,217,0.5)] border border-black border-solid h-[58px] left-[32px] rounded-[12px] shadow-[4px_4px_0px_0px_black] top-[503px] w-[363px]" />
@@ -128,21 +134,21 @@ export default function ViewIncomeModal({ income, isOpen, onClose, onDelete, onE
           </svg>
         </div>
         
-        <div className="absolute font-['Plus_Jakarta_Sans:SemiBold',sans-serif] font-semibold h-[18px] leading-[normal] left-[132px] text-[18px] text-black top-[520px] tracking-[-0.18px] w-[140px]">
+        <div className={`absolute font-['Plus_Jakarta_Sans:SemiBold',sans-serif] font-semibold h-[18px] leading-[normal] left-[132px] text-[18px] top-[520px] tracking-[-0.18px] w-[140px] ${isDarkMode ? 'text-white' : 'text-black'}`}>
           <p className="mb-0 overflow-hidden text-ellipsis whitespace-nowrap">{income.title}</p>
         </div>
         
-        <p className="absolute font-['Inter:SemiBold',sans-serif] font-semibold h-[25px] leading-[normal] left-[280px] text-[20px] text-black top-[518px] tracking-[-0.2px] w-[110px] text-right">+₱{income.amount.toFixed(2)}</p>
+        <p className={`absolute font-['Inter:SemiBold',sans-serif] font-semibold h-[25px] leading-[normal] left-[280px] text-[20px] top-[518px] tracking-[-0.2px] w-[110px] text-right ${isDarkMode ? 'text-white' : 'text-black'}`}>+₱{income.amount.toFixed(2)}</p>
         
         {/* Date and time */}
-        <div className="absolute font-['Inter:Regular',sans-serif] font-normal leading-[normal] left-[38px] not-italic text-[0px] text-black top-[443px] tracking-[-0.16px] w-[259px]">
+        <div className={`absolute font-['Inter:Regular',sans-serif] font-normal leading-[normal] left-[38px] not-italic text-[0px] top-[443px] tracking-[-0.16px] w-[259px] ${isDarkMode ? 'text-white' : 'text-black'}`}>
           <p className="font-['Inter:Bold',sans-serif] font-bold mb-0 text-[16px]">{income.date}</p>
           <p className="text-[11px]">{income.time}</p>
         </div>
         
         {/* Description box */}
         <div className="absolute bg-[rgba(217,217,217,0.3)] border border-[rgba(0,0,0,0.3)] border-solid h-[174px] left-[32px] rounded-[10px] top-[585px] w-[367px] overflow-hidden" />
-        <p className="absolute font-['Inter:Italic',sans-serif] font-normal italic leading-[normal] left-[54px] text-[11px] text-[rgba(0,0,0,0.5)] top-[600px] tracking-[-0.11px] w-[307px] max-h-[150px] overflow-y-auto break-words">{income.description || 'Description'}</p>
+        <p className={`absolute font-['Inter:Italic',sans-serif] font-normal italic leading-[normal] left-[54px] text-[11px] top-[600px] tracking-[-0.11px] w-[307px] max-h-[150px] overflow-y-auto break-words ${isDarkMode ? 'text-white/70' : 'text-[rgba(0,0,0,0.5)]'}`}>{income.description || 'Description'}</p>
         
         <EditButton onClick={handleEdit} />
         <DeleteButton onClick={handleDelete} />
@@ -158,7 +164,7 @@ export default function ViewIncomeModal({ income, isOpen, onClose, onDelete, onE
         <div className="absolute left-[369px] size-[20px] top-[445px] opacity-75" data-name="Card Type Icon">
           <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 21 21">
             <g clipPath="url(#clip0_card_type)" id="Dollar sign">
-              <path d={svgPathsIncome.p48e69c0} id="Icon" stroke="black" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" />
+              <path d={svgPathsIncome.p48e69c0} id="Icon" stroke={isDarkMode ? '#FFFFFF' : 'black'} strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" />
             </g>
             <defs>
               <clipPath id="clip0_card_type">
