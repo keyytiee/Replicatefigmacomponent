@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import svgPaths from "../imports/svg-income-history";
-import imgAlablav2 from "figma:asset/9422bc98a614e179daee1421f39c6c0dfc7ddfc7.png";
+import imgAlablav2 from "../assets/alablav.png";
+import imgAlablav3 from "../assets/alablav.png";
 import imgUntitledDesign41 from "figma:asset/0f43c782522af7290a29a6e4387b4648c9fd1c0c.png";
 import BankMoneyCard from "./BankMoneyCard";
 import CashMoneyCard from "./CashMoneyCard";
@@ -305,7 +306,7 @@ export default function IncomeHistoryModal({ isOpen, onClose, cardType, balances
     >
       {/* Background pattern */}
       <div className="absolute h-[926px] left-0 opacity-10 top-0 w-[428px]">
-        <img alt="" className="absolute inset-0 max-w-none object-50%-50% object-cover pointer-events-none size-full" src={imgUntitledDesign41} />
+        <img alt="" className="absolute inset-0 max-w-none object-center object-cover pointer-events-none size-full" src={imgUntitledDesign41} />
       </div>
 
       {/* Card Stack Area - Tinder-style Deck */}
@@ -397,6 +398,9 @@ export default function IncomeHistoryModal({ isOpen, onClose, cardType, balances
                     <p className="absolute font-['Plus_Jakarta_Sans:Regular',sans-serif] font-normal h-[18px] leading-[normal] left-[27px] text-[#303030] text-[12px] top-[144px] tracking-[-0.12px] w-[99px] opacity-75">
                       Current Balance
                     </p>
+                    <div className="absolute h-[162px] left-[237px] pointer-events-none top-[70px] w-[126px]" data-name="ALABLAV 2" style={{ border: '3px solid red', background: 'rgba(255,0,0,0.15)', position: 'relative', zIndex: 50 }}>
+                      <img alt="bank-cat" className="absolute inset-0 max-w-none object-center object-cover size-full" style={{ filter: 'drop-shadow(0px 15px 4px rgba(0,0,0,0.25))' }} src={imgAlablav2} onLoad={() => console.log('Bank cat image loaded')} onError={() => console.error('Bank cat image failed to load:', imgAlablav2)} />
+                    </div>
                   </div>
                 )}
 
@@ -413,6 +417,9 @@ export default function IncomeHistoryModal({ isOpen, onClose, cardType, balances
                     <p className="absolute font-['Plus_Jakarta_Sans:Regular',sans-serif] font-normal h-[18px] leading-[normal] left-[27px] text-white text-[12px] top-[144px] tracking-[-0.12px] w-[99px] opacity-75">
                       Current Balance
                     </p>
+                    <div className="absolute h-[162px] left-[237px] pointer-events-none top-[70px] w-[126px] border-2 border-red-500" data-name="ALABLAV 2" style={{ background: 'rgba(255,0,0,0.1)' }}>
+                      <img alt="cash-cat" className="absolute inset-0 max-w-none object-center object-cover size-full" style={{ filter: 'drop-shadow(0px 15px 4px rgba(0,0,0,0.25))' }} src={imgAlablav2} />
+                    </div>
                   </div>
                 )}
 
@@ -429,6 +436,9 @@ export default function IncomeHistoryModal({ isOpen, onClose, cardType, balances
                     <p className="absolute font-['Plus_Jakarta_Sans:Regular',sans-serif] font-normal h-[18px] leading-[normal] left-[27px] text-white text-[12px] top-[144px] tracking-[-0.12px] w-[99px] opacity-75">
                       Current Balance
                     </p>
+                    <div className="absolute h-[162px] left-[259px] pointer-events-none top-[69px] w-[126px] border-2 border-red-500" data-name="ALABLAV 3" style={{ background: 'rgba(255,0,0,0.1)' }}>
+                      <img alt="savings-cat" className="absolute inset-0 max-w-none object-center object-cover size-full" style={{ filter: 'drop-shadow(0px 15px 4px rgba(0,0,0,0.25))' }} src={imgAlablav3} />
+                    </div>
                   </div>
                 )}
               </div>

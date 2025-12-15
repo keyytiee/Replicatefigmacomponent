@@ -1,6 +1,6 @@
 import svgPaths from "./svg-4x1e3tngsb";
 import imgUntitledDesign41 from "figma:asset/0f43c782522af7290a29a6e4387b4648c9fd1c0c.png";
-import imgAlablav3 from "figma:asset/9422bc98a614e179daee1421f39c6c0dfc7ddfc7.png";
+import imgAlablav3 from "../assets/alablav.png";
 
 function AddTransactionButton() {
   return (
