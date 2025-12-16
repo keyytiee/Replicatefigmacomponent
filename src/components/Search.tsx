@@ -31,7 +31,7 @@ interface SearchProps {
   isDarkMode?: boolean;
 }
 
-// Initialize CategoryManager singleton for O(1) category lookups using HashMap DSA
+// Initialize CategoryManager singleton for O(1) category lookups using HashMap 
 const categoryManager = CategoryManager.getInstance();
 
 function Sidebar({ onClick, isDarkMode }: { onClick: () => void; isDarkMode?: boolean }) {

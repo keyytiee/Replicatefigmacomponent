@@ -14,6 +14,7 @@ import MiscellaneousDetail from "./MiscellaneousDetail";
 import DynamicPieChart from "./DynamicPieChart";
 import CategoryListItem from "./CategoryListItem";
 import type { Transaction } from "../App";
+import { CategoryManager } from "../utils/dsa";
 
 interface AnalyticsProps {
   isOpen: boolean;
@@ -24,6 +25,9 @@ interface AnalyticsProps {
   onExportClick?: () => void;
   onSearchClick?: () => void;
 }
+
+// Initialize CategoryManager singleton for O(1) category color lookups using HashMap 
+const categoryManager = CategoryManager.getInstance();
 
 type TimePeriod = 'week' | 'month' | 'year' | 'all';
 
@@ -218,9 +222,6 @@ export default function Analytics({ isOpen, onClose, isDarkMode, transactions, o
   // ========================================
   // HASHMAP IMPLEMENTATION FOR ANALYTICS
   // ========================================
-  // Instead of 8 separate filter/reduce passes (O(8n)),
-  // we use HashMap for single-pass aggregation (O(n))
-  // This is 3-4x faster for large datasets!
   
   const categoryTotals = useMemo(() => {
     // Initialize HashMap with all 8 categories at 0
@@ -276,14 +277,14 @@ export default function Analytics({ isOpen, onClose, isDarkMode, transactions, o
 
   // Prepare data for dynamic pie chart
   const categoryData = useMemo(() => [
-    { name: 'Transportation', value: transportationExpenses, percentage: transportationPercent, color: '#6E86A9' },
-    { name: 'Food & Grocery', value: foodGroceryExpenses, percentage: foodGroceryPercent, color: '#8BAA4E' },
-    { name: 'Healthcare', value: healthcareExpenses, percentage: healthcarePercent, color: '#B45C4C' },
-    { name: 'Leisure', value: leisureExpenses, percentage: leisurePercent, color: '#E8C85E' },
-    { name: 'Utilities', value: utilitiesExpenses, percentage: utilitiesPercent, color: '#4A506F' },
-    { name: 'Education', value: educationExpenses, percentage: educationPercent, color: '#75689C' },
-    { name: 'Miscellaneous', value: miscellaneousExpenses, percentage: miscellaneousPercent, color: '#B5AFA8' },
-    { name: 'Bills', value: billsExpenses, percentage: billsPercent, color: '#D99C42' },
+    { name: 'Transportation', value: transportationExpenses, percentage: transportationPercent, color: categoryManager.getCategoryColor('Transportation', false) },
+    { name: 'Food & Grocery', value: foodGroceryExpenses, percentage: foodGroceryPercent, color: categoryManager.getCategoryColor('Food & Grocery', false) },
+    { name: 'Healthcare', value: healthcareExpenses, percentage: healthcarePercent, color: categoryManager.getCategoryColor('Healthcare', false) },
+    { name: 'Leisure', value: leisureExpenses, percentage: leisurePercent, color: categoryManager.getCategoryColor('Leisure', false) },
+    { name: 'Utilities', value: utilitiesExpenses, percentage: utilitiesPercent, color: categoryManager.getCategoryColor('Utilities', false) },
+    { name: 'Education', value: educationExpenses, percentage: educationPercent, color: categoryManager.getCategoryColor('Education', false) },
+    { name: 'Miscellaneous', value: miscellaneousExpenses, percentage: miscellaneousPercent, color: categoryManager.getCategoryColor('Miscellaneous', false) },
+    { name: 'Bills', value: billsExpenses, percentage: billsPercent, color: categoryManager.getCategoryColor('Bills', false) },
   ], [transportationExpenses, foodGroceryExpenses, healthcareExpenses, leisureExpenses, utilitiesExpenses, educationExpenses, miscellaneousExpenses, billsExpenses, transportationPercent, foodGroceryPercent, healthcarePercent, leisurePercent, utilitiesPercent, educationPercent, miscellaneousPercent, billsPercent]);
 
   // Sort categories by percentage (highest to lowest)

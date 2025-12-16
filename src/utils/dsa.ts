@@ -19,8 +19,8 @@ export interface HistoryState {
   timestamp: number;
 }
 
-// Stack implementation for Undo/Redo
-export class UndoRedoStack {
+// Stack implementation for Undo/Redo (Internal - used only by UndoRedoManager)
+class UndoRedoStack {
   private top: StackNode<HistoryState> | null = null;
   private size: number = 0;
   private maxSize: number;
@@ -94,7 +94,7 @@ export class UndoRedoStack {
   }
 }
 
-// Undo/Redo Manager - Proper DSA implementation for managing both stacks
+// Undo/Redo Manager
 export class UndoRedoManager {
   private undoStack: UndoRedoStack;
   private redoStack: UndoRedoStack;
@@ -199,8 +199,8 @@ export class UndoRedoManager {
   }
 }
 
-// Hash Map for category management
-export class HashMap<K, V> {
+// Hash Map for category management (Internal - used only by CategoryManager)
+class HashMap<K, V> {
   private buckets: Array<Array<{ key: K; value: V }>>;
   private size: number = 0;
   private capacity: number;
@@ -340,11 +340,7 @@ function merge<T>(left: T[], right: T[], compareFn: (a: T, b: T) => number): T[]
 
 // Linear Search for flexible searching with custom match function
 /**
- * Linear Search Algorithm - O(n) time complexity
- * Performs sequential search through an array with a custom matching function
- * @param arr - The array to search through
- * @param matchFn - Function that returns true if an item matches the search criteria
- * @returns Array of items that match the search criteria
+
  */
 export function linearSearch<T>(
   arr: T[],
@@ -363,14 +359,12 @@ export function linearSearch<T>(
   return results;
 }
 
-// ==========================================
-// CATEGORY MANAGER USING HASHMAP DSA
-// ==========================================
+
 
 /**
- * CategoryInfo - Information stored for each category
+ * CategoryInfo - Information stored for each category (Internal - used only by CategoryManager)
  */
-export interface CategoryInfo {
+interface CategoryInfo {
   name: string;
   color: string;              // Solid color for light mode
   colorDark: string;          // Color for dark mode
@@ -458,9 +452,6 @@ export class CategoryManager {
 
   /**
    * Get category color using HashMap O(1) lookup
-   * @param category - Category name
-   * @param isDarkMode - Whether to return dark mode color
-   * @returns Color string or default gray
    */
   public getCategoryColor(category: string, isDarkMode: boolean = false): string {
     const info = this.categoryMap.get(category);
@@ -473,8 +464,6 @@ export class CategoryManager {
 
   /**
    * Check if category exists using HashMap O(1) lookup
-   * @param category - Category name to check
-   * @returns true if category exists
    */
   public hasCategory(category: string): boolean {
     return this.categoryMap.has(category);
@@ -490,8 +479,6 @@ export class CategoryManager {
 
   /**
    * Get category info object using HashMap O(1) lookup
-   * @param category - Category name
-   * @returns CategoryInfo object or undefined
    */
   public getCategoryInfo(category: string): CategoryInfo | undefined {
     return this.categoryMap.get(category);
@@ -500,8 +487,6 @@ export class CategoryManager {
   /**
    * Get all categories as plain object (for backward compatibility)
    * Converts HashMap internal structure to plain object
-   * @param isDarkMode - Whether to return dark mode colors
-   * @returns Object mapping category names to colors
    */
   public getAllColorsAsObject(isDarkMode: boolean = false): { [key: string]: string } {
     const result: { [key: string]: string } = {};

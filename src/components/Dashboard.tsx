@@ -17,7 +17,7 @@ import Search from "./Search";
 import UndoToast from "./UndoToast";
 import PawPrint from "./PawPrint";
 import type { Transaction, Income, CardBalances } from "../App";
-import { mergeSort } from "../utils/dsa";
+import { mergeSort, CategoryManager } from "../utils/dsa";
 
 interface DashboardProps {
   balances: CardBalances;
@@ -50,29 +50,8 @@ function AddTransactionButton() {
   );
 }
 
-// Category colors mapping
-const categoryColors: { [key: string]: string } = {
-  'Transportation': 'rgba(110,134,169,0.5)',
-  'Food & Grocery': 'rgba(139,170,78,0.5)',
-  'Healthcare': 'rgba(180,92,76,0.5)',
-  'Education': 'rgba(117,104,156,0.5)',
-  'Utilities': 'rgba(74,80,111,0.5)',
-  'Leisure': 'rgba(232,200,94,0.5)',
-  'Bills': 'rgba(200,150,100,0.5)',
-  'Miscellaneous': 'rgba(150,150,150,0.5)'
-};
-
-// Dark mode category colors - brighter and more vibrant
-const categoryColorsDark: { [key: string]: string } = {
-  'Transportation': 'rgba(150,174,209,0.85)',
-  'Food & Grocery': 'rgba(169,200,108,0.85)',
-  'Healthcare': 'rgba(220,122,106,0.85)',
-  'Education': 'rgba(147,134,186,0.85)',
-  'Utilities': 'rgba(104,110,141,0.85)',
-  'Leisure': 'rgba(255,230,124,0.85)',
-  'Bills': 'rgba(230,180,130,0.85)',
-  'Miscellaneous': 'rgba(180,180,180,0.85)'
-};
+// Initialize CategoryManager singleton for O(1) category color lookups using HashMap DSA
+const categoryManager = CategoryManager.getInstance();
 
 interface TransactionItemProps {
   transaction: Transaction;
@@ -83,7 +62,8 @@ interface TransactionItemProps {
 }
 
 function TransactionItem({ transaction, index, onClick, isDarkMode, shouldAnimate = true }: TransactionItemProps) {
-  const backgroundColor = isDarkMode ? categoryColorsDark[transaction.category] || 'rgba(150,150,150,0.5)' : categoryColors[transaction.category] || 'rgba(150,150,150,0.5)';
+  // Use HashMap DSA for O(1) category color lookup
+  const backgroundColor = categoryManager.getCategoryColor(transaction.category, isDarkMode);
   const animationDelay = `${index * 100}ms`;
   
   // Determine font size based on amount length
