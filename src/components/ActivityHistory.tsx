@@ -1,9 +1,10 @@
 import { useState } from "react";
-import svgPaths from "../imports/svg-dashboard";
-import imgUntitledDesign41 from "figma:asset/0f43c782522af7290a29a6e4387b4648c9fd1c0c.png";
-import NavigationSidebar from "./NavigationSidebar";
-import type { Transaction, Income, CardBalances } from "../App";
 import { ChevronLeft } from "lucide-react";
+import svgPaths from "../imports/svg-qkfc2tudm8";
+import imgUntitledDesign41 from "figma:asset/0f43c782522af7290a29a6e4387b4648c9fd1c0c.png";
+import type { Transaction, Income } from "../App";
+import { mergeSort } from "../utils/dsa";
+import NavigationSidebar from "./NavigationSidebar";
 
 interface ActivityHistoryProps {
   isOpen: boolean;
@@ -11,7 +12,7 @@ interface ActivityHistoryProps {
   cardType: 'bank' | 'cash' | 'savings';
   transactions: Transaction[];
   incomes: Income[];
-  balances: CardBalances;
+  balances: { [key: string]: number };
   onSettingsClick?: () => void;
   onExportClick?: () => void;
   onAnalyticsClick?: () => void;
@@ -207,8 +208,9 @@ export default function ActivityHistory({
     }))
   ];
 
-  // Sort by recency (most recent first)
-  activityItems.sort((a, b) => b.timestamp - a.timestamp);
+  // Sort by recency (most recent first) using Merge Sort
+  // Merge Sort is O(n log n) guaranteed, stable, and works well for financial data
+  const sortedActivityItems = mergeSort(activityItems, (a, b) => b.timestamp - a.timestamp);
 
   return (
     <>
@@ -240,7 +242,7 @@ export default function ActivityHistory({
 
         {/* Activity List */}
         <div className="absolute left-[36px] top-[158px] w-[356px] h-[610px] overflow-y-auto scrollbar-hide">
-          {activityItems.length === 0 ? (
+          {sortedActivityItems.length === 0 ? (
             <div className="flex flex-col items-center justify-center pt-[100px]">
               <p className={`font-['Plus_Jakarta_Sans'] font-semibold text-[16px] text-center ${isDarkMode ? 'text-[rgba(255,255,255,0.5)]' : 'text-[rgba(48,48,48,0.5)]'}`}>
                 No activity yet
@@ -251,7 +253,7 @@ export default function ActivityHistory({
             </div>
           ) : (
             <div className="space-y-3 pb-6">
-              {activityItems.map((item, index) => {
+              {sortedActivityItems.map((item, index) => {
                 const bgColor = item.type === 'transaction' && item.category
                   ? categoryColors[item.category] || "#d9d9d9"
                   : "#d9d9d9";

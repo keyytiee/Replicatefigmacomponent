@@ -1,6 +1,6 @@
-import svgPaths from "../imports/svg-7xps7bhzz9";
-import imgUntitledDesign41 from "figma:asset/0f43c782522af7290a29a6e4387b4648c9fd1c0c.png";
 import { useState } from "react";
+import svgPaths from "../imports/svg-0aesjwf68r";
+import imgUntitledDesign41 from "figma:asset/c99aba11ea0cd59e2b73f19e6fc8c88e62c1de76.png";
 import NavigationSidebar from "./NavigationSidebar";
 import SearchFilter from "./SearchFilter";
 import IncomeSearchFilter from "./IncomeSearchFilter";
@@ -9,6 +9,7 @@ import ViewIncomeModal from "./ViewIncomeModal";
 import AddTransactionModal from "./AddTransactionModal";
 import EditIncomeModal from "./EditIncomeModal";
 import type { Transaction, Income } from "../App";
+import { linearSearch, CategoryManager } from "../utils/dsa";
 
 interface SearchProps {
   isOpen: boolean;
@@ -30,17 +31,8 @@ interface SearchProps {
   isDarkMode?: boolean;
 }
 
-// Category colors mapping
-const categoryColors: { [key: string]: string } = {
-  "Food & Grocery": "#8baa4e",
-  "Transportation": "#6e86a9",
-  "Bills": "#d99c42",
-  "Utilities": "#4a506f",
-  "Healthcare": "#b45c4c",
-  "Leisure": "#e8c85e",
-  "Education": "#75689c",
-  "Miscellaneous": "#b5afa8",
-};
+// Initialize CategoryManager singleton for O(1) category lookups using HashMap DSA
+const categoryManager = CategoryManager.getInstance();
 
 function Sidebar({ onClick, isDarkMode }: { onClick: () => void; isDarkMode?: boolean }) {
   const fillColor = isDarkMode ? '#FFFFFF' : '#303030';
@@ -87,13 +79,13 @@ function SearchBar({ value, onChange, onFilterClick, isDarkMode, searchMode }: {
         }`}
       />
       <button 
-        className="absolute left-[363px] size-[23px] top-[10px] cursor-pointer hover:opacity-70 transition-opacity"
+        className="absolute left-[363px] size-[23px] top-[10px] cursor-pointer hover:opacity-70 transition-opacity z-10"
         onClick={onFilterClick}
         data-name="stash:filter"
       >
         <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 23 23">
           <g id="stash:filter">
-            <path d={svgPaths.p39941b80} fill={isDarkMode ? '#FFFFFF' : '#303030'} fillOpacity="0.75" id="Vector" />
+            <path d={svgPaths.p1b112c80} fill={isDarkMode ? '#FFFFFF' : '#303030'} fillOpacity="0.75" id="Vector" />
           </g>
         </svg>
       </button>
@@ -129,10 +121,10 @@ export default function Search({ isOpen, onClose, onSettingsClick, onExportClick
     }, 300); // Match animation duration
   };
 
-  // Filter transactions based on search value and selected categories
+  // Filter transactions based on search value and selected categories using Linear Search DSA
   const filteredTransactions = searchValue.trim() === ""
     ? [] 
-    : transactions.filter((transaction) => {
+    : linearSearch(transactions, (transaction) => {
         const searchLower = searchValue.toLowerCase();
         const matchesSearch = (
           transaction.title.toLowerCase().includes(searchLower) ||
@@ -149,10 +141,10 @@ export default function Search({ isOpen, onClose, onSettingsClick, onExportClick
         return matchesSearch && selectedCategories.includes(transaction.category);
       });
 
-  // Filter incomes based on search value and selected card types
+  // Filter incomes based on search value and selected card types using Linear Search DSA
   const filteredIncomes = searchValue.trim() === ""
     ? [] 
-    : incomes.filter((income) => {
+    : linearSearch(incomes, (income) => {
         const searchLower = searchValue.toLowerCase();
         const matchesSearch = (
           income.title.toLowerCase().includes(searchLower) ||
@@ -212,7 +204,7 @@ export default function Search({ isOpen, onClose, onSettingsClick, onExportClick
           <img alt="" className="absolute inset-0 max-w-none object-50%-50% object-cover pointer-events-none size-full" src={imgUntitledDesign41} />
         </div>
         
-        <SearchBar value={searchValue} onChange={setSearchValue} onFilterClick={handleFilterClick} isDarkMode={isDarkMode} />
+        <SearchBar value={searchValue} onChange={setSearchValue} onFilterClick={handleFilterClick} isDarkMode={isDarkMode} searchMode={searchMode} />
         
         {/* Toggle Switch */}
         <div className="absolute left-[15px] top-[105px] w-[397px] flex items-center gap-2">
@@ -271,7 +263,8 @@ export default function Search({ isOpen, onClose, onSettingsClick, onExportClick
                   {selectedCardTypes.length > 0 && ` in ${selectedCardTypes.map(ct => ct === 'bank' ? 'Bank Money' : ct === 'cash' ? 'Cash Money' : 'Savings Money').join(', ')}`}
                 </p>
                 {filteredTransactions.map((transaction) => {
-                  const categoryColor = categoryColors[transaction.category] || "#b5afa8";
+                  // Use HashMap DSA for O(1) category color lookup
+                  const categoryColor = categoryManager.getCategoryColor(transaction.category);
                   return (
                     <div
                       key={transaction.id}

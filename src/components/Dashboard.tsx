@@ -17,7 +17,7 @@ import Search from "./Search";
 import UndoToast from "./UndoToast";
 import PawPrint from "./PawPrint";
 import type { Transaction, Income, CardBalances } from "../App";
-import { mergeSort, binarySearchClosest, TransactionHashMap } from "../utils/dsa";
+import { mergeSort } from "../utils/dsa";
 
 interface DashboardProps {
   balances: CardBalances;
@@ -674,13 +674,23 @@ export default function Dashboard({ balances, transactions, incomes, onAddTransa
       {/* Scrollable Transactions Container */}
       <div className="absolute left-0 top-[375px] w-[428px] h-[430px] overflow-visible">
         <div className="relative w-full h-full overflow-y-auto overflow-x-hidden scrollbar-hide pb-[70px] pt-[8px]">
-          {transactions
-            .filter(transaction => {
-              // Filter transactions based on which card is currently in front
-              const currentCardType = cardOrder[0] === 0 ? 'bank' : cardOrder[0] === 1 ? 'cash' : 'savings';
-              return transaction.cardType === currentCardType;
-            })
-            .map((transaction, index) => (
+          {(() => {
+            // Filter transactions based on which card is currently in front
+            const currentCardType = cardOrder[0] === 0 ? 'bank' : cardOrder[0] === 1 ? 'cash' : 'savings';
+            const filteredTransactions = transactions.filter(transaction => 
+              transaction.cardType === currentCardType
+            );
+
+            // Sort transactions chronologically using Merge Sort (newest first)
+            // Merge Sort guarantees O(n log n) stable sorting
+            const sortedTransactions = mergeSort(filteredTransactions, (a, b) => {
+              // Create timestamp from date and time for accurate sorting
+              const dateTimeA = new Date(`${a.date} ${a.time}`).getTime();
+              const dateTimeB = new Date(`${b.date} ${b.time}`).getTime();
+              return dateTimeB - dateTimeA; // Descending order (newest first)
+            });
+
+            return sortedTransactions.map((transaction, index) => (
               <TransactionItem 
                 key={shouldAnimateTransactions ? `${transaction.id}-animate` : transaction.id} 
                 transaction={transaction} 
@@ -689,7 +699,8 @@ export default function Dashboard({ balances, transactions, incomes, onAddTransa
                 isDarkMode={isDarkMode} 
                 shouldAnimate={shouldAnimateTransactions}
               />
-            ))}
+            ));
+          })()}
         </div>
         {/* Fade effect at bottom */}
         <div className={`absolute bottom-0 left-0 w-full h-[100px] pointer-events-none bg-gradient-to-t ${isDarkMode ? 'from-[#1E1E1E] via-[#1E1E1E]/80' : 'from-white via-white/80'} to-transparent`} />

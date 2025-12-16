@@ -312,13 +312,15 @@ export default function App() {
   const [canRedo, setCanRedo] = useState(false);
 
   useEffect(() => {
-    // Auto-advance to dashboard after 3 seconds
-    const timer = setTimeout(() => {
-      setCurrentScreen("dashboard");
-    }, 3000);
+    // Auto-advance from splash to onboarding after 3 seconds
+    if (currentScreen === "splash") {
+      const timer = setTimeout(() => {
+        setCurrentScreen("dashboard");
+      }, 3000);
 
-    return () => clearTimeout(timer);
-  }, []);
+      return () => clearTimeout(timer);
+    }
+  }, [currentScreen]);
 
   const handleSplashClick = () => {
     setCurrentScreen("dashboard");

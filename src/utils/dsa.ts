@@ -199,158 +199,6 @@ export class UndoRedoManager {
   }
 }
 
-// Queue Node for transaction ordering
-class QueueNode<T> {
-  value: T;
-  next: QueueNode<T> | null;
-
-  constructor(value: T) {
-    this.value = value;
-    this.next = null;
-  }
-}
-
-// Queue implementation for transaction ordering
-export class Queue<T> {
-  private front: QueueNode<T> | null = null;
-  private rear: QueueNode<T> | null = null;
-  private size: number = 0;
-
-  enqueue(value: T): void {
-    const newNode = new QueueNode(value);
-    
-    if (this.isEmpty()) {
-      this.front = newNode;
-      this.rear = newNode;
-    } else {
-      this.rear!.next = newNode;
-      this.rear = newNode;
-    }
-    this.size++;
-  }
-
-  dequeue(): T | null {
-    if (this.isEmpty()) {
-      return null;
-    }
-
-    const value = this.front!.value;
-    this.front = this.front!.next;
-    
-    if (this.front === null) {
-      this.rear = null;
-    }
-    
-    this.size--;
-    return value;
-  }
-
-  peek(): T | null {
-    if (this.isEmpty()) {
-      return null;
-    }
-    return this.front!.value;
-  }
-
-  isEmpty(): boolean {
-    return this.front === null;
-  }
-
-  getSize(): number {
-    return this.size;
-  }
-
-  toArray(): T[] {
-    const result: T[] = [];
-    let current = this.front;
-    
-    while (current !== null) {
-      result.push(current.value);
-      current = current.next;
-    }
-    
-    return result;
-  }
-}
-
-// Binary Search Tree Node
-class BSTNode<T> {
-  value: T;
-  key: number;
-  left: BSTNode<T> | null = null;
-  right: BSTNode<T> | null = null;
-
-  constructor(key: number, value: T) {
-    this.key = key;
-    this.value = value;
-  }
-}
-
-// Binary Search Tree for data organization
-export class BinarySearchTree<T> {
-  private root: BSTNode<T> | null = null;
-
-  insert(key: number, value: T): void {
-    const newNode = new BSTNode(key, value);
-    
-    if (this.root === null) {
-      this.root = newNode;
-    } else {
-      this.insertNode(this.root, newNode);
-    }
-  }
-
-  private insertNode(node: BSTNode<T>, newNode: BSTNode<T>): void {
-    if (newNode.key < node.key) {
-      if (node.left === null) {
-        node.left = newNode;
-      } else {
-        this.insertNode(node.left, newNode);
-      }
-    } else {
-      if (node.right === null) {
-        node.right = newNode;
-      } else {
-        this.insertNode(node.right, newNode);
-      }
-    }
-  }
-
-  search(key: number): T | null {
-    return this.searchNode(this.root, key);
-  }
-
-  private searchNode(node: BSTNode<T> | null, key: number): T | null {
-    if (node === null) {
-      return null;
-    }
-
-    if (key === node.key) {
-      return node.value;
-    }
-
-    if (key < node.key) {
-      return this.searchNode(node.left, key);
-    } else {
-      return this.searchNode(node.right, key);
-    }
-  }
-
-  inorderTraversal(): T[] {
-    const result: T[] = [];
-    this.inorder(this.root, result);
-    return result;
-  }
-
-  private inorder(node: BSTNode<T> | null, result: T[]): void {
-    if (node !== null) {
-      this.inorder(node.left, result);
-      result.push(node.value);
-      this.inorder(node.right, result);
-    }
-  }
-}
-
 // Hash Map for category management
 export class HashMap<K, V> {
   private buckets: Array<Array<{ key: K; value: V }>>;
@@ -490,27 +338,179 @@ function merge<T>(left: T[], right: T[], compareFn: (a: T, b: T) => number): T[]
   return result.concat(left.slice(i)).concat(right.slice(j));
 }
 
-// Binary Search for efficient searching
-export function binarySearch<T>(
+// Linear Search for flexible searching with custom match function
+/**
+ * Linear Search Algorithm - O(n) time complexity
+ * Performs sequential search through an array with a custom matching function
+ * @param arr - The array to search through
+ * @param matchFn - Function that returns true if an item matches the search criteria
+ * @returns Array of items that match the search criteria
+ */
+export function linearSearch<T>(
   arr: T[],
-  target: T,
-  compareFn: (a: T, b: T) => number
-): number {
-  let left = 0;
-  let right = arr.length - 1;
-
-  while (left <= right) {
-    const mid = Math.floor((left + right) / 2);
-    const comparison = compareFn(arr[mid], target);
-
-    if (comparison === 0) {
-      return mid;
-    } else if (comparison < 0) {
-      left = mid + 1;
-    } else {
-      right = mid - 1;
+  matchFn: (item: T) => boolean
+): T[] {
+  const results: T[] = [];
+  
+  // Iterate through each item in the array
+  for (let i = 0; i < arr.length; i++) {
+    // Check if the current item matches the search criteria
+    if (matchFn(arr[i])) {
+      results.push(arr[i]);
     }
   }
+  
+  return results;
+}
 
-  return -1; // Not found
+// ==========================================
+// CATEGORY MANAGER USING HASHMAP DSA
+// ==========================================
+
+/**
+ * CategoryInfo - Information stored for each category
+ */
+export interface CategoryInfo {
+  name: string;
+  color: string;              // Solid color for light mode
+  colorDark: string;          // Color for dark mode
+}
+
+/**
+ * CategoryManager - Centralized category management using HashMap DSA
+ * Singleton pattern ensures single source of truth for all 8 expense categories
+ * Uses HashMap internally for O(1) category lookups
+ */
+export class CategoryManager {
+  private static instance: CategoryManager;
+  private categoryMap: HashMap<string, CategoryInfo>;
+
+  private constructor() {
+    this.categoryMap = new HashMap<string, CategoryInfo>(16);
+    this.initializeCategories();
+  }
+
+  /**
+   * Get singleton instance - ensures one CategoryManager across entire app
+   * @returns CategoryManager singleton instance
+   */
+  public static getInstance(): CategoryManager {
+    if (!CategoryManager.instance) {
+      CategoryManager.instance = new CategoryManager();
+    }
+    return CategoryManager.instance;
+  }
+
+  /**
+   * Initialize all 8 expense categories with their color mappings
+   * Uses HashMap.set() for O(1) insertion
+   */
+  private initializeCategories(): void {
+    // All 8 categories from your requirements
+    this.categoryMap.set("Food & Grocery", { 
+      name: "Food & Grocery",
+      color: "#8baa4e",
+      colorDark: "rgba(169,200,108,0.85)"
+    });
+    
+    this.categoryMap.set("Transportation", { 
+      name: "Transportation",
+      color: "#6e86a9",
+      colorDark: "rgba(150,174,209,0.85)"
+    });
+    
+    this.categoryMap.set("Bills", { 
+      name: "Bills",
+      color: "#d99c42",
+      colorDark: "rgba(230,180,102,0.85)"
+    });
+    
+    this.categoryMap.set("Utilities", { 
+      name: "Utilities",
+      color: "#4a506f",
+      colorDark: "rgba(104,110,141,0.85)"
+    });
+    
+    this.categoryMap.set("Healthcare", { 
+      name: "Healthcare",
+      color: "#b45c4c",
+      colorDark: "rgba(220,122,106,0.85)"
+    });
+    
+    this.categoryMap.set("Leisure", { 
+      name: "Leisure",
+      color: "#e8c85e",
+      colorDark: "rgba(248,228,124,0.85)"
+    });
+    
+    this.categoryMap.set("Education", { 
+      name: "Education",
+      color: "#75689c",
+      colorDark: "rgba(147,134,186,0.85)"
+    });
+    
+    this.categoryMap.set("Miscellaneous", { 
+      name: "Miscellaneous",
+      color: "#b5afa8",
+      colorDark: "rgba(185,179,168,0.85)"
+    });
+  }
+
+  /**
+   * Get category color using HashMap O(1) lookup
+   * @param category - Category name
+   * @param isDarkMode - Whether to return dark mode color
+   * @returns Color string or default gray
+   */
+  public getCategoryColor(category: string, isDarkMode: boolean = false): string {
+    const info = this.categoryMap.get(category);
+    if (!info) {
+      // Return default color if category not found
+      return isDarkMode ? "rgba(150,150,150,0.85)" : "#b5afa8";
+    }
+    return isDarkMode ? info.colorDark : info.color;
+  }
+
+  /**
+   * Check if category exists using HashMap O(1) lookup
+   * @param category - Category name to check
+   * @returns true if category exists
+   */
+  public hasCategory(category: string): boolean {
+    return this.categoryMap.has(category);
+  }
+
+  /**
+   * Get all category names - O(n) where n = 8
+   * @returns Array of all category names
+   */
+  public getAllCategories(): string[] {
+    return this.categoryMap.keys();
+  }
+
+  /**
+   * Get category info object using HashMap O(1) lookup
+   * @param category - Category name
+   * @returns CategoryInfo object or undefined
+   */
+  public getCategoryInfo(category: string): CategoryInfo | undefined {
+    return this.categoryMap.get(category);
+  }
+
+  /**
+   * Get all categories as plain object (for backward compatibility)
+   * Converts HashMap internal structure to plain object
+   * @param isDarkMode - Whether to return dark mode colors
+   * @returns Object mapping category names to colors
+   */
+  public getAllColorsAsObject(isDarkMode: boolean = false): { [key: string]: string } {
+    const result: { [key: string]: string } = {};
+    const categories = this.getAllCategories();
+    
+    for (const category of categories) {
+      result[category] = this.getCategoryColor(category, isDarkMode);
+    }
+    
+    return result;
+  }
 }
