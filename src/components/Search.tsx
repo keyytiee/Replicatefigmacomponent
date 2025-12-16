@@ -93,7 +93,7 @@ function SearchBar({ value, onChange, onFilterClick, isDarkMode, searchMode }: {
       >
         <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 23 23">
           <g id="stash:filter">
-            <path d={svgPaths.p1b112c80} fill={isDarkMode ? '#FFFFFF' : '#303030'} fillOpacity="0.75" id="Vector" />
+            <path d={svgPaths.p39941b80} fill={isDarkMode ? '#FFFFFF' : '#303030'} fillOpacity="0.75" id="Vector" />
           </g>
         </svg>
       </button>

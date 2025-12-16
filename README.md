@@ -1,7 +1,7 @@
 
-  # Replicate Figma Component
+  # MoneyMap | CCC121 Final
 
-  This is a code bundle for Replicate Figma Component. The original project is available at https://www.figma.com/design/FARa4s7puiAHLNfkaTBgQw/Replicate-Figma-Component.
+  This is a code bundle for MoneyMap | CCC121 Final. The original project is available at https://www.figma.com/design/FARa4s7puiAHLNfkaTBgQw/MoneyMap-%7C-CCC121-Final.
 
   ## Running the code
 
