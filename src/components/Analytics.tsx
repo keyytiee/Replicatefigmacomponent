@@ -141,6 +141,15 @@ export default function Analytics({ isOpen, onClose, isDarkMode, transactions, o
   const [isMiscellaneousDetailOpen, setMiscellaneousDetailOpen] = useState(false);
   const [timePeriod, setTimePeriod] = useState<TimePeriod>('week');
   const [referenceDate, setReferenceDate] = useState(new Date(2025, 11, 13)); // December 13, 2025
+  const [isAnimatingOut, setIsAnimatingOut] = useState(false);
+
+  const handleClose = () => {
+    setIsAnimatingOut(true);
+    setTimeout(() => {
+      setIsAnimatingOut(false);
+      onClose();
+    }, 300); // Match animation duration
+  };
 
   // Filter transactions based on selected time period
   const filteredTransactions = useMemo(() => {
@@ -297,11 +306,16 @@ export default function Analytics({ isOpen, onClose, isDarkMode, transactions, o
     }
   };
 
-  if (!isOpen) return null;
+  if (!isOpen && !isAnimatingOut) return null;
 
   return (
     <>
-      <div className={`absolute inset-0 z-[70] transition-colors duration-300 ${isDarkMode ? 'bg-[#1E1E1E]' : 'bg-white'}`} data-name="Analytics">
+      <div 
+        className={`absolute inset-0 z-[70] transition-all duration-300 ${isDarkMode ? 'bg-[#1E1E1E]' : 'bg-white'} ${
+          isAnimatingOut ? 'animate-[slideOutRight_0.3s_ease-in-out_forwards]' : 'animate-[slideInRight_0.3s_ease-in-out]'
+        }`} 
+        data-name="Analytics"
+      >
         {/* Background */}
         <div className="absolute h-[932px] left-[-3px] opacity-10 top-px w-[431px]" data-name="Untitled design (4) 1">
           <img
@@ -311,12 +325,12 @@ export default function Analytics({ isOpen, onClose, isDarkMode, transactions, o
           />
         </div>
 
-        <ReturnButton onClick={onClose} isDarkMode={isDarkMode} />
+        <ReturnButton onClick={handleClose} isDarkMode={isDarkMode} />
         <Sidebar onClick={() => setSidebarOpen(true)} isDarkMode={isDarkMode} />
         <NavigationSidebar
           isOpen={isSidebarOpen}
           onClose={() => setSidebarOpen(false)}
-          onHomeClick={onClose}
+          onHomeClick={handleClose}
           onSettingsClick={onSettingsClick}
           onExportClick={onExportClick}
           onAnalyticsClick={() => setSidebarOpen(false)}

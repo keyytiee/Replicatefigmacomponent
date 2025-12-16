@@ -316,9 +316,18 @@ function ActivityRow({ item, top, isDarkMode }: { item: ActivityItem; top: numbe
 export default function Export({ isOpen, onClose, transactions, incomes, cardType, balance, isDarkMode, onSettingsClick, onAnalyticsClick, onSearchClick }: ExportProps) {
   const [isReceiptOpen, setReceiptOpen] = useState(false);
   const [isSidebarOpen, setSidebarOpen] = useState(false);
+  const [isAnimatingOut, setIsAnimatingOut] = useState(false);
   
-  if (!isOpen) return null;
+  if (!isOpen && !isAnimatingOut) return null;
 
+  const handleClose = () => {
+    setIsAnimatingOut(true);
+    setTimeout(() => {
+      setIsAnimatingOut(false);
+      onClose();
+    }, 300); // Match animation duration
+  };
+  
   const cardTypeLabel = cardType === 'bank' ? 'Bank Money' : cardType === 'cash' ? 'Cash Money' : 'Savings Money';
   
   // Filter transactions by card type
@@ -353,11 +362,16 @@ export default function Export({ isOpen, onClose, transactions, incomes, cardTyp
 
   return (
     <>
-      <div className={`absolute inset-0 z-[70] transition-colors duration-300 ${isDarkMode ? 'bg-[#1E1E1E]' : 'bg-white'}`} data-name="Export">
+      <div 
+        className={`absolute inset-0 z-[70] transition-all duration-300 ${isDarkMode ? 'bg-[#1E1E1E]' : 'bg-white'} ${
+          isAnimatingOut ? 'animate-[slideOutRight_0.3s_ease-in-out_forwards]' : 'animate-[slideInRight_0.3s_ease-in-out]'
+        }`} 
+        data-name="Export"
+      >
         <div className="absolute h-[932px] left-0 opacity-10 top-[-5px] w-[431px]" data-name="Untitled design (4) 1">
           <img alt="" className="absolute inset-0 max-w-none object-50%-50% object-cover pointer-events-none size-full" src={imgUntitledDesign41} />
         </div>
-        <ReturnButton onClick={onClose} isDarkMode={isDarkMode} />
+        <ReturnButton onClick={handleClose} isDarkMode={isDarkMode} />
         <p className={`absolute font-['Plus_Jakarta_Sans:ExtraBold',sans-serif] font-extrabold h-[20px] leading-[normal] left-[213.5px] text-[20px] text-center top-[49px] tracking-[-0.2px] translate-x-[-50%] w-[171px] ${isDarkMode ? 'text-white' : 'text-[#303030]'}`}>{cardTypeLabel}</p>
         
         {/* Current Balance Display */}

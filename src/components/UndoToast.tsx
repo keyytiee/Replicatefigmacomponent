@@ -4,10 +4,12 @@ interface UndoToastProps {
   isOpen: boolean;
   message: string;
   onUndo: () => void;
+  onRedo: () => void;
   onClose: () => void;
+  canRedo: boolean;
 }
 
-export default function UndoToast({ isOpen, message, onUndo, onClose }: UndoToastProps) {
+export default function UndoToast({ isOpen, message, onUndo, onRedo, onClose, canRedo }: UndoToastProps) {
   useEffect(() => {
     if (isOpen) {
       const timer = setTimeout(() => {
@@ -16,7 +18,7 @@ export default function UndoToast({ isOpen, message, onUndo, onClose }: UndoToas
 
       return () => clearTimeout(timer);
     }
-  }, [isOpen, onClose]);
+  }, [isOpen, onClose, message]); // Add message to dependencies so timer resets on message change
 
   if (!isOpen) return null;
 
@@ -31,6 +33,17 @@ export default function UndoToast({ isOpen, message, onUndo, onClose }: UndoToas
           className="font-['Plus_Jakarta_Sans:Bold',sans-serif] font-bold text-[#ffcb3d] text-[14px] tracking-[-0.14px] hover:text-[#ffd55a] transition-colors"
         >
           UNDO
+        </button>
+        <button
+          onClick={onRedo}
+          disabled={!canRedo}
+          className={`font-['Plus_Jakarta_Sans:Bold',sans-serif] font-bold text-[14px] tracking-[-0.14px] transition-colors ${
+            canRedo 
+              ? 'text-[#ffcb3d] hover:text-[#ffd55a] cursor-pointer' 
+              : 'text-white/30 cursor-not-allowed'
+          }`}
+        >
+          REDO
         </button>
         <button
           onClick={onClose}

@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import svgPaths from "../imports/svg-dashboard";
 import imgUntitledDesign41 from "figma:asset/0f43c782522af7290a29a6e4387b4648c9fd1c0c.png";
 import catImage from 'figma:asset/381c6e21276e90d23982de9a213d2e800eee37e1.png';
+import catLogoCard from 'figma:asset/9422bc98a614e179daee1421f39c6c0dfc7ddfc7.png';
 import NavigationSidebar from "./NavigationSidebar";
 import ViewTransactionModal from "./ViewTransactionModal";
 import AddTransactionModal from "./AddTransactionModal";
@@ -31,6 +32,8 @@ interface DashboardProps {
   showUndoToast: boolean;
   undoMessage: string;
   onUndo: () => void;
+  onRedo: () => void;
+  canRedo: boolean;
   onCloseUndoToast: () => void;
   isDarkMode: boolean;
   onToggleDarkMode: (value: boolean) => void;
@@ -76,9 +79,10 @@ interface TransactionItemProps {
   index: number;
   onClick: () => void;
   isDarkMode?: boolean;
+  shouldAnimate?: boolean;
 }
 
-function TransactionItem({ transaction, index, onClick, isDarkMode }: TransactionItemProps) {
+function TransactionItem({ transaction, index, onClick, isDarkMode, shouldAnimate = true }: TransactionItemProps) {
   const backgroundColor = isDarkMode ? categoryColorsDark[transaction.category] || 'rgba(150,150,150,0.5)' : categoryColors[transaction.category] || 'rgba(150,150,150,0.5)';
   const animationDelay = `${index * 100}ms`;
   
@@ -89,11 +93,14 @@ function TransactionItem({ transaction, index, onClick, isDarkMode }: Transactio
   // Render icon based on category - all centered in the 76px container
   const renderIcon = () => {
     const iconProps = {
-      className: "absolute pointer-events-none animate-[slideUp_0.5s_ease-out_forwards]",
-      style: { 
+      className: `absolute pointer-events-none ${shouldAnimate ? 'animate-[slideUp_0.5s_ease-out_forwards]' : ''}`,
+      style: shouldAnimate ? { 
         animationDelay,
         opacity: 0,
         transform: 'translateY(20px)'
+      } : {
+        opacity: 1,
+        transform: 'translateY(0)'
       }
     };
 
@@ -186,22 +193,29 @@ function TransactionItem({ transaction, index, onClick, isDarkMode }: Transactio
       >
         {/* Main card border with shadow */}
         <div 
-          className="absolute border border-black border-solid h-[58px] left-[36px] top-0 rounded-[12px] shadow-[4px_4px_0px_0px_#000000] group-hover:shadow-[4px_8px_0px_0px_#000000] w-[363px] animate-[slideUp_0.5s_ease-out_forwards]"
-          style={{ 
+          className={`absolute border border-black border-solid h-[58px] left-[36px] top-0 rounded-[12px] shadow-[4px_4px_0px_0px_#000000] group-hover:shadow-[4px_8px_0px_0px_#000000] w-[363px] ${shouldAnimate ? 'animate-[slideUp_0.5s_ease-out_forwards]' : ''}`}
+          style={shouldAnimate ? { 
             backgroundColor,
             animationDelay,
             opacity: 0,
             transform: 'translateY(20px)'
+          } : {
+            backgroundColor,
+            opacity: 1,
+            transform: 'translateY(0)'
           }}
         />
         
         {/* Icon background - moves with the group */}
         <div 
-          className="absolute bg-[rgba(48,48,48,0.3)] h-[36px] left-[49px] top-[11px] rounded-[10px] w-[76px] pointer-events-none animate-[slideUp_0.5s_ease-out_forwards]"
-          style={{ 
+          className={`absolute bg-[rgba(48,48,48,0.3)] h-[36px] left-[49px] top-[11px] rounded-[10px] w-[76px] pointer-events-none ${shouldAnimate ? 'animate-[slideUp_0.5s_ease-out_forwards]' : ''}`}
+          style={shouldAnimate ? { 
             animationDelay,
             opacity: 0,
             transform: 'translateY(20px)'
+          } : {
+            opacity: 1,
+            transform: 'translateY(0)'
           }}
         />
         
@@ -210,11 +224,14 @@ function TransactionItem({ transaction, index, onClick, isDarkMode }: Transactio
         
         {/* Category name - moves with the group */}
         <p 
-          className="absolute font-['Plus_Jakarta_Sans:SemiBold',sans-serif] font-semibold leading-[normal] left-[138px] top-[11px] text-[18px] text-black tracking-[-0.18px] w-[120px] pointer-events-none animate-[slideUp_0.5s_ease-out_forwards] overflow-hidden text-ellipsis whitespace-nowrap"
-          style={{ 
+          className={`absolute font-['Plus_Jakarta_Sans:SemiBold',sans-serif] font-semibold leading-[normal] left-[138px] top-[11px] text-[18px] text-black tracking-[-0.18px] w-[120px] pointer-events-none ${shouldAnimate ? 'animate-[slideUp_0.5s_ease-out_forwards]' : ''} overflow-hidden text-ellipsis whitespace-nowrap`}
+          style={shouldAnimate ? { 
             animationDelay,
             opacity: 0,
             transform: 'translateY(20px)'
+          } : {
+            opacity: 1,
+            transform: 'translateY(0)'
           }}
         >
           {transaction.category}
@@ -222,8 +239,8 @@ function TransactionItem({ transaction, index, onClick, isDarkMode }: Transactio
         
         {/* Price - moves with the group */}
         <p 
-          className="absolute font-['Inter:SemiBold',sans-serif] font-semibold leading-[normal] text-black tracking-[-0.2px] text-right pointer-events-none animate-[slideUp_0.5s_ease-out_forwards]"
-          style={{ 
+          className={`absolute font-['Inter:SemiBold',sans-serif] font-semibold leading-[normal] text-black tracking-[-0.2px] text-right pointer-events-none ${shouldAnimate ? 'animate-[slideUp_0.5s_ease-out_forwards]' : ''}`}
+          style={shouldAnimate ? { 
             left: '260px',
             width: '128px',
             top: fontSize === '16px' ? '19px' : '17px',
@@ -231,6 +248,13 @@ function TransactionItem({ transaction, index, onClick, isDarkMode }: Transactio
             animationDelay,
             opacity: 0,
             transform: 'translateY(20px)'
+          } : {
+            left: '260px',
+            width: '128px',
+            top: fontSize === '16px' ? '19px' : '17px',
+            fontSize,
+            opacity: 1,
+            transform: 'translateY(0)'
           }}
         >
           -₱{transaction.amount.toFixed(2)}
@@ -238,11 +262,14 @@ function TransactionItem({ transaction, index, onClick, isDarkMode }: Transactio
         
         {/* Date/Time - moves with the group */}
         <p 
-          className="absolute font-['Inter:Regular',sans-serif] font-normal leading-[normal] left-[138px] top-[36px] not-italic text-[8px] text-black tracking-[-0.08px] w-[182px] pointer-events-none animate-[slideUp_0.5s_ease-out_forwards] overflow-hidden text-ellipsis whitespace-nowrap"
-          style={{ 
+          className={`absolute font-['Inter:Regular',sans-serif] font-normal leading-[normal] left-[138px] top-[36px] not-italic text-[8px] text-black tracking-[-0.08px] w-[182px] pointer-events-none ${shouldAnimate ? 'animate-[slideUp_0.5s_ease-out_forwards]' : ''} overflow-hidden text-ellipsis whitespace-nowrap`}
+          style={shouldAnimate ? { 
             animationDelay,
             opacity: 0,
             transform: 'translateY(20px)'
+          } : {
+            opacity: 1,
+            transform: 'translateY(0)'
           }}
         >
           {transaction.date} | {transaction.time}
@@ -273,7 +300,7 @@ function Sidebar({ onClick, isDarkMode }: { onClick: () => void; isDarkMode?: bo
   );
 }
 
-export default function Dashboard({ balances, transactions, incomes, onAddTransaction, onAddIncome, onDeleteTransaction, onEditTransaction, onDeleteIncome, onEditIncome, showUndoToast, undoMessage, onUndo, onCloseUndoToast, isDarkMode, onToggleDarkMode }: DashboardProps) {
+export default function Dashboard({ balances, transactions, incomes, onAddTransaction, onAddIncome, onDeleteTransaction, onEditTransaction, onDeleteIncome, onEditIncome, showUndoToast, undoMessage, onUndo, onRedo, canRedo, onCloseUndoToast, isDarkMode, onToggleDarkMode }: DashboardProps) {
   const [isModalOpen, setModalOpen] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
   const [cardOrder, setCardOrder] = useState([0, 1, 2]); // Track which card is at which position
@@ -301,7 +328,38 @@ export default function Dashboard({ balances, transactions, incomes, onAddTransa
   const [isAnalyticsOpen, setAnalyticsOpen] = useState(false);
   const [isSearchOpen, setSearchOpen] = useState(false);
   const [isActivityHistoryOpen, setActivityHistoryOpen] = useState(false);
+  const [shouldAnimateTransactions, setShouldAnimateTransactions] = useState(false);
   const cardAreaRef = useRef<HTMLDivElement>(null);
+  const prevCardOrderRef = useRef<number[]>([0, 1, 2]);
+
+  // Track when we're returning from income history to trigger animation
+  useEffect(() => {
+    if (!isIncomeHistoryOpen && isDashboardVisible) {
+      setShouldAnimateTransactions(true);
+      // Reset after animation completes
+      const timer = setTimeout(() => {
+        setShouldAnimateTransactions(false);
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [isIncomeHistoryOpen, isDashboardVisible]);
+
+  // Trigger animation when card order changes (card swipe)
+  useEffect(() => {
+    // Check if card order actually changed (front card changed)
+    if (prevCardOrderRef.current[0] !== cardOrder[0]) {
+      setShouldAnimateTransactions(true);
+      // Reset after animation completes
+      const timer = setTimeout(() => {
+        setShouldAnimateTransactions(false);
+      }, 1000);
+      
+      // Update the ref to current card order
+      prevCardOrderRef.current = cardOrder;
+      
+      return () => clearTimeout(timer);
+    }
+  }, [cardOrder]);
 
   const handleTransactionClick = (transaction: Transaction) => {
     setSelectedTransaction(transaction);
@@ -553,6 +611,12 @@ export default function Dashboard({ balances, transactions, incomes, onAddTransa
                     <p className="absolute font-['Plus_Jakarta_Sans:Regular',sans-serif] font-normal h-[18px] leading-[normal] left-[27px] text-[#303030] text-[12px] top-[144px] tracking-[-0.12px] w-[99px] opacity-75">
                       Current Balance
                     </p>
+                    {/* Cat Logo - positioned inside card, bottom aligned */}
+                    <img 
+                      src={catLogoCard} 
+                      alt="Cat Logo" 
+                      className="absolute right-[15px] bottom-[35px] w-[128px] h-auto pointer-events-none z-10"
+                    />
                   </div>
                 )}
 
@@ -569,6 +633,12 @@ export default function Dashboard({ balances, transactions, incomes, onAddTransa
                     <p className="absolute font-['Plus_Jakarta_Sans:Regular',sans-serif] font-normal h-[18px] leading-[normal] left-[27px] text-white text-[12px] top-[144px] tracking-[-0.12px] w-[99px] opacity-75">
                       Current Balance
                     </p>
+                    {/* Cat Logo - positioned inside card, bottom aligned */}
+                    <img 
+                      src={catLogoCard} 
+                      alt="Cat Logo" 
+                      className="absolute right-[15px] bottom-[35px] w-[128px] h-auto pointer-events-none z-10"
+                    />
                   </div>
                 )}
 
@@ -585,6 +655,12 @@ export default function Dashboard({ balances, transactions, incomes, onAddTransa
                     <p className="absolute font-['Plus_Jakarta_Sans:Regular',sans-serif] font-normal h-[18px] leading-[normal] left-[27px] text-white text-[12px] top-[144px] tracking-[-0.12px] w-[99px] opacity-75">
                       Current Balance
                     </p>
+                    {/* Cat Logo - positioned inside card, bottom aligned */}
+                    <img 
+                      src={catLogoCard} 
+                      alt="Cat Logo" 
+                      className="absolute right-[15px] bottom-[35px] w-[128px] h-auto pointer-events-none z-10"
+                    />
                   </div>
                 )}
               </div>
@@ -605,7 +681,14 @@ export default function Dashboard({ balances, transactions, incomes, onAddTransa
               return transaction.cardType === currentCardType;
             })
             .map((transaction, index) => (
-              <TransactionItem key={transaction.id} transaction={transaction} index={index} onClick={() => handleTransactionClick(transaction)} isDarkMode={isDarkMode} />
+              <TransactionItem 
+                key={shouldAnimateTransactions ? `${transaction.id}-animate` : transaction.id} 
+                transaction={transaction} 
+                index={index} 
+                onClick={() => handleTransactionClick(transaction)} 
+                isDarkMode={isDarkMode} 
+                shouldAnimate={shouldAnimateTransactions}
+              />
             ))}
         </div>
         {/* Fade effect at bottom */}
@@ -766,14 +849,24 @@ export default function Dashboard({ balances, transactions, incomes, onAddTransa
         isOpen={showUndoToast} 
         onClose={onCloseUndoToast} 
         onUndo={onUndo} 
+        onRedo={onRedo}
+        canRedo={canRedo}
         message={undoMessage} 
       />
       
       {/* Decorative Paw Prints */}
-      <PawPrint className="absolute top-[360px] left-[10px] opacity-10 pointer-events-none" size={35} color="#303030" />
-      <PawPrint className="absolute top-[450px] right-[15px] opacity-10 pointer-events-none rotate-[-15deg]" size={30} color="#303030" />
-      <PawPrint className="absolute top-[650px] left-[8px] opacity-10 pointer-events-none rotate-[20deg]" size={28} color="#303030" />
-      <PawPrint className="absolute top-[785px] right-[12px] opacity-10 pointer-events-none rotate-[-25deg]" size={32} color="#303030" />
+      <div className="absolute top-[360px] left-[10px] pointer-events-none z-[1]">
+        <PawPrint size={35} opacity={0.08} rotation={0} color={isDarkMode ? '#FFFFFF' : '#303030'} />
+      </div>
+      <div className="absolute top-[450px] right-[15px] pointer-events-none z-[1]">
+        <PawPrint size={30} opacity={0.08} rotation={-15} color={isDarkMode ? '#FFFFFF' : '#303030'} />
+      </div>
+      <div className="absolute top-[650px] left-[8px] pointer-events-none z-[1]">
+        <PawPrint size={28} opacity={0.08} rotation={20} color={isDarkMode ? '#FFFFFF' : '#303030'} />
+      </div>
+      <div className="absolute top-[785px] right-[12px] pointer-events-none z-[1]">
+        <PawPrint size={32} opacity={0.08} rotation={-25} color={isDarkMode ? '#FFFFFF' : '#303030'} />
+      </div>
       
       {/* Settings Screen */}
       <Settings 

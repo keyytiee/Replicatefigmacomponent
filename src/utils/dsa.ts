@@ -13,8 +13,9 @@ class StackNode<T> {
 
 // History State for undo/redo operations
 export interface HistoryState {
+  transactions: any[];
+  balances: any;
   action: string;
-  data: any;
   timestamp: number;
 }
 
@@ -90,6 +91,111 @@ export class UndoRedoStack {
       prev.next = null;
       this.size--;
     }
+  }
+}
+
+// Undo/Redo Manager - Proper DSA implementation for managing both stacks
+export class UndoRedoManager {
+  private undoStack: UndoRedoStack;
+  private redoStack: UndoRedoStack;
+
+  constructor(maxSize: number = 50) {
+    this.undoStack = new UndoRedoStack(maxSize);
+    this.redoStack = new UndoRedoStack(maxSize);
+  }
+
+  /**
+   * Save current state before performing a new action
+   * This clears the redo stack since we're creating a new timeline
+   */
+  saveState(state: HistoryState): void {
+    this.undoStack.push(state);
+    this.redoStack.clear(); // Clear redo stack on new action
+  }
+
+  /**
+   * Undo the last action
+   * Returns the previous state and saves current state to redo stack
+   */
+  undo(currentState: HistoryState): HistoryState | null {
+    const previousState = this.undoStack.pop();
+    if (previousState) {
+      // Save current state to redo stack before undoing
+      this.redoStack.push(currentState);
+      return previousState;
+    }
+    return null;
+  }
+
+  /**
+   * Redo the last undone action
+   * Returns the next state and saves current state to undo stack
+   */
+  redo(currentState: HistoryState): HistoryState | null {
+    const nextState = this.redoStack.pop();
+    if (nextState) {
+      // Save current state to undo stack before redoing
+      this.undoStack.push(currentState);
+      return nextState;
+    }
+    return null;
+  }
+
+  /**
+   * Check if undo is available
+   */
+  canUndo(): boolean {
+    return !this.undoStack.isEmpty();
+  }
+
+  /**
+   * Check if redo is available
+   */
+  canRedo(): boolean {
+    return !this.redoStack.isEmpty();
+  }
+
+  /**
+   * Get the size of undo stack
+   */
+  getUndoSize(): number {
+    return this.undoStack.getSize();
+  }
+
+  /**
+   * Get the size of redo stack
+   */
+  getRedoSize(): number {
+    return this.redoStack.getSize();
+  }
+
+  /**
+   * Clear both undo and redo stacks
+   */
+  clearAll(): void {
+    this.undoStack.clear();
+    this.redoStack.clear();
+  }
+
+  /**
+   * Clear only the redo stack
+   */
+  clearRedoStack(): void {
+    this.redoStack.clear();
+  }
+
+  /**
+   * Peek at the next undo state without removing it
+   */
+  peekUndo(): HistoryState | null {
+    return this.undoStack.peek();
+  }
+
+  /**
+   * Peek at the next redo state without removing it
+   */
+  peekRedo(): HistoryState | null {
+    return this.redoStack.peek();
   }
 }
 

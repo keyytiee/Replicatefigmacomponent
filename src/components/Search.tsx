@@ -64,7 +64,9 @@ function Sidebar({ onClick, isDarkMode }: { onClick: () => void; isDarkMode?: bo
   );
 }
 
-function SearchBar({ value, onChange, onFilterClick, isDarkMode }: { value: string; onChange: (value: string) => void; onFilterClick: () => void; isDarkMode?: boolean }) {
+function SearchBar({ value, onChange, onFilterClick, isDarkMode, searchMode }: { value: string; onChange: (value: string) => void; onFilterClick: () => void; isDarkMode?: boolean; searchMode?: 'transactions' | 'incomes' }) {
+  const placeholder = searchMode === 'incomes' ? 'Search incomes' : 'Search transactions';
+  
   return (
     <div className="absolute left-[15px] top-[49px]" data-name="Search Transactions">
       <div className={`absolute h-[44px] left-0 rounded-[12px] top-0 w-[397px] ${isDarkMode ? 'bg-[#404040]' : 'bg-[#d9d9d9]'}`} />
@@ -77,7 +79,7 @@ function SearchBar({ value, onChange, onFilterClick, isDarkMode }: { value: stri
         type="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        placeholder="Search transactions"
+        placeholder={placeholder}
         className={`absolute font-['Plus_Jakarta_Sans'] font-bold h-[21px] leading-[normal] left-[47px] text-[14px] top-[11px] tracking-[-0.14px] w-[290px] bg-transparent border-none outline-none ${
           isDarkMode 
             ? 'text-[rgba(255,255,255,0.75)] placeholder:text-[rgba(255,255,255,0.5)]' 
@@ -105,6 +107,7 @@ export default function Search({ isOpen, onClose, onSettingsClick, onExportClick
   const [isFilterOpen, setFilterOpen] = useState(false);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedCardTypes, setSelectedCardTypes] = useState<string[]>([]);
+  const [isAnimatingOut, setIsAnimatingOut] = useState(false);
   const [searchMode, setSearchMode] = useState<'transactions' | 'incomes'>('transactions');
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
   const [selectedIncome, setSelectedIncome] = useState<Income | null>(null);
@@ -116,10 +119,18 @@ export default function Search({ isOpen, onClose, onSettingsClick, onExportClick
   const [transactionToEdit, setTransactionToEdit] = useState<Transaction | null>(null);
   const [incomeToEdit, setIncomeToEdit] = useState<Income | null>(null);
 
-  if (!isOpen) return null;
+  if (!isOpen && !isAnimatingOut) return null;
+
+  const handleClose = () => {
+    setIsAnimatingOut(true);
+    setTimeout(() => {
+      setIsAnimatingOut(false);
+      onClose();
+    }, 300); // Match animation duration
+  };
 
   // Filter transactions based on search value and selected categories
-  const filteredTransactions = searchValue.trim() === "" || searchMode === 'incomes'
+  const filteredTransactions = searchValue.trim() === ""
     ? [] 
     : transactions.filter((transaction) => {
         const searchLower = searchValue.toLowerCase();
@@ -139,7 +150,7 @@ export default function Search({ isOpen, onClose, onSettingsClick, onExportClick
       });
 
   // Filter incomes based on search value and selected card types
-  const filteredIncomes = searchValue.trim() === "" || searchMode === 'transactions'
+  const filteredIncomes = searchValue.trim() === ""
     ? [] 
     : incomes.filter((income) => {
         const searchLower = searchValue.toLowerCase();
@@ -158,7 +169,7 @@ export default function Search({ isOpen, onClose, onSettingsClick, onExportClick
         return matchesSearch && selectedCardTypes.includes(income.cardType);
       });
 
-  const totalResults = searchMode === 'transactions' ? filteredTransactions.length : filteredIncomes.length;
+  const totalResults = filteredTransactions.length + filteredIncomes.length;
   const showResults = searchValue.trim() !== "";
 
   const handleFilterClick = () => {
@@ -191,7 +202,12 @@ export default function Search({ isOpen, onClose, onSettingsClick, onExportClick
 
   return (
     <>
-      <div className={`absolute inset-0 z-[80] transition-colors duration-300 ${isDarkMode ? 'bg-[#1E1E1E]' : 'bg-white'}`} data-name="Search">
+      <div 
+        className={`absolute inset-0 z-[80] transition-all duration-300 ${isDarkMode ? 'bg-[#1E1E1E]' : 'bg-white'} ${
+          isAnimatingOut ? 'animate-[slideOutRight_0.3s_ease-in-out_forwards]' : 'animate-[slideInRight_0.3s_ease-in-out]'
+        }`} 
+        data-name="Search"
+      >
         <div className="absolute h-[932px] left-0 opacity-10 top-0 w-[431px]" data-name="Untitled design (4) 1">
           <img alt="" className="absolute inset-0 max-w-none object-50%-50% object-cover pointer-events-none size-full" src={imgUntitledDesign41} />
         </div>
@@ -251,8 +267,8 @@ export default function Search({ isOpen, onClose, onSettingsClick, onExportClick
               <div className="space-y-3">
                 <p className={`font-['Plus_Jakarta_Sans'] font-semibold text-[16px] ${isDarkMode ? 'text-[rgba(255,255,255,0.75)]' : 'text-[rgba(48,48,48,0.75)]'} mb-4`}>
                   {totalResults} {totalResults === 1 ? 'result' : 'results'} found
-                  {searchMode === 'transactions' && selectedCategories.length > 0 && ` in ${selectedCategories.join(', ')}`}
-                  {searchMode === 'incomes' && selectedCardTypes.length > 0 && ` in ${selectedCardTypes.map(ct => ct === 'bank' ? 'Bank Money' : ct === 'cash' ? 'Cash Money' : 'Savings Money').join(', ')}`}
+                  {selectedCategories.length > 0 && ` in ${selectedCategories.join(', ')}`}
+                  {selectedCardTypes.length > 0 && ` in ${selectedCardTypes.map(ct => ct === 'bank' ? 'Bank Money' : ct === 'cash' ? 'Cash Money' : 'Savings Money').join(', ')}`}
                 </p>
                 {filteredTransactions.map((transaction) => {
                   const categoryColor = categoryColors[transaction.category] || "#b5afa8";
@@ -354,17 +370,17 @@ export default function Search({ isOpen, onClose, onSettingsClick, onExportClick
         <NavigationSidebar 
           isOpen={isSidebarOpen} 
           onClose={() => setSidebarOpen(false)}
-          onHomeClick={onClose}
+          onHomeClick={handleClose}
           onSettingsClick={() => {
-            onClose();
+            handleClose();
             if (onSettingsClick) onSettingsClick();
           }}
           onExportClick={() => {
-            onClose();
+            handleClose();
             if (onExportClick) onExportClick();
           }}
           onAnalyticsClick={() => {
-            onClose();
+            handleClose();
             if (onAnalyticsClick) onAnalyticsClick();
           }}
           onSearchClick={() => setSidebarOpen(false)}

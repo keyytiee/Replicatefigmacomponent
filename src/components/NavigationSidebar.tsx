@@ -27,48 +27,66 @@ function MaterialSymbolsLightFileExportOutlineRounded() {
 
 export default function NavigationSidebar({ isOpen, onClose, currentScreen = "Home", onSettingsClick, onExportClick, onAnalyticsClick, onHomeClick, onSearchClick, isDarkMode }: NavigationSidebarProps) {
   const [isAnimating, setIsAnimating] = useState(false);
+  const [isAnimatingOut, setIsAnimatingOut] = useState(false);
+  const [shouldAnimate, setShouldAnimate] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
       setIsAnimating(true);
+      setIsAnimatingOut(false);
+      // Small delay to ensure initial state is rendered before animating
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          setShouldAnimate(true);
+        });
+      });
     } else {
-      const timer = setTimeout(() => setIsAnimating(false), 300);
-      return () => clearTimeout(timer);
+      setShouldAnimate(false);
     }
   }, [isOpen]);
+
+  const handleClose = () => {
+    setShouldAnimate(false);
+    setIsAnimatingOut(true);
+    setTimeout(() => {
+      setIsAnimating(false);
+      setIsAnimatingOut(false);
+      onClose();
+    }, 300);
+  };
 
   const handleSettingsClick = () => {
     if (onSettingsClick) {
       onSettingsClick();
-      onClose();
+      handleClose();
     }
   };
 
   const handleExportClick = () => {
     if (onExportClick) {
       onExportClick();
-      onClose();
+      handleClose();
     }
   };
 
   const handleAnalyticsClick = () => {
     if (onAnalyticsClick) {
       onAnalyticsClick();
-      onClose();
+      handleClose();
     }
   };
 
   const handleHomeClick = () => {
     if (onHomeClick) {
       onHomeClick();
-      onClose();
+      handleClose();
     }
   };
 
   const handleSearchClick = () => {
     if (onSearchClick) {
       onSearchClick();
-      onClose();
+      handleClose();
     }
   };
 
@@ -79,15 +97,15 @@ export default function NavigationSidebar({ isOpen, onClose, currentScreen = "Ho
       {/* Dark overlay - lower z-index */}
       <div 
         className={`absolute bg-[rgba(0,0,0,0.75)] h-[926px] left-0 top-0 w-[428px] z-[45] transition-opacity duration-300 ${
-          isOpen ? 'opacity-100' : 'opacity-0'
+          shouldAnimate && !isAnimatingOut ? 'opacity-100' : 'opacity-0'
         }`}
-        onClick={onClose}
+        onClick={handleClose}
       />
       
       {/* Sidebar Container - matching exact Figma positions relative to left-[246px] top-[250px] */}
       <div 
-        className={`absolute left-[246px] top-[250px] z-[50] transition-transform duration-300 ease-out ${
-          isOpen ? 'translate-x-0' : 'translate-x-[200px]'
+        className={`absolute left-[246px] top-[250px] z-[50] transition-all duration-300 ease-in-out ${
+          shouldAnimate && !isAnimatingOut ? 'translate-x-0 opacity-100' : 'translate-x-[200px] opacity-0'
         }`}
         data-name="Sidebar"
       >

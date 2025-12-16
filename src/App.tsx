@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import SplashScreen from "./components/SplashScreen";
 import Dashboard from "./components/Dashboard";
-import { UndoRedoStack, type HistoryState } from "./utils/dsa";
+import { UndoRedoManager, type HistoryState } from "./utils/dsa";
 
 export interface Transaction {
   id: string;
@@ -306,9 +306,10 @@ export default function App() {
   ]);
   
   // Undo/Redo Stack for transaction history
-  const [undoStack] = useState(() => new UndoRedoStack(50));
+  const [undoRedoManager] = useState(() => new UndoRedoManager(50));
   const [showUndoToast, setShowUndoToast] = useState(false);
   const [undoMessage, setUndoMessage] = useState("");
+  const [canRedo, setCanRedo] = useState(false);
 
   useEffect(() => {
     // Auto-advance to dashboard after 3 seconds
@@ -331,7 +332,7 @@ export default function App() {
       action,
       timestamp: Date.now()
     };
-    undoStack.push(state);
+    undoRedoManager.saveState(state);
   };
 
   const addTransaction = (transaction: Omit<Transaction, 'id'>) => {
@@ -343,8 +344,9 @@ export default function App() {
       id: Date.now().toString()
     };
     
-    // Update transactions (Queue - FIFO: newest first)
-    setTransactions(prev => [newTransaction, ...prev]);
+   // Update transactions (FIFO: oldest first)
+    setTransactions(prev => [...prev, newTransaction]);
+
     
     // Update balance
     setBalances(prev => ({
@@ -492,14 +494,55 @@ export default function App() {
   };
 
   const handleUndo = () => {
-    const previousState = undoStack.undo();
+    // Create current state to save before undoing
+    const currentState: HistoryState = {
+      transactions: [...transactions],
+      balances: { ...balances },
+      action: 'current',
+      timestamp: Date.now()
+    };
+    
+    const previousState = undoRedoManager.undo(currentState);
     if (previousState) {
+      // Restore previous state
       setTransactions(previousState.transactions);
       setBalances(previousState.balances);
-      setShowUndoToast(false);
+      
+      // Update canRedo state
+      setCanRedo(undoRedoManager.canRedo());
+      
+      // Update message to show redo is available
+      setUndoMessage("Action undone");
+      // Keep toast visible so user can redo
+      setShowUndoToast(true);
     }
   };
 
+  const handleRedo = () => {
+    // Create current state to save before redoing
+    const currentState: HistoryState = {
+      transactions: [...transactions],
+      balances: { ...balances },
+      action: 'current',
+      timestamp: Date.now()
+    };
+    
+    const nextState = undoRedoManager.redo(currentState);
+    if (nextState) {
+      // Restore next state
+      setTransactions(nextState.transactions);
+      setBalances(nextState.balances);
+      
+      // Update canRedo state
+      setCanRedo(undoRedoManager.canRedo());
+      
+      // Update message to show action was redone
+      setUndoMessage("Action redone");
+      // Keep toast visible so user can undo again
+      setShowUndoToast(true);
+    }
+  };
+  
   return (
     <div className="bg-gray-100 flex items-center justify-center min-h-screen w-full">
       <div className="bg-white relative w-[428px] h-[926px] overflow-hidden shadow-2xl">
@@ -529,6 +572,8 @@ export default function App() {
             showUndoToast={showUndoToast}
             undoMessage={undoMessage}
             onUndo={handleUndo}
+            onRedo={handleRedo}
+            canRedo={canRedo}
             onCloseUndoToast={() => setShowUndoToast(false)}
             isDarkMode={isDarkMode}
             onToggleDarkMode={setIsDarkMode}

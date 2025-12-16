@@ -80,8 +80,9 @@ function Book() {
 export default function Settings({ isOpen, onClose, isDarkMode, onToggleDarkMode, onExportClick, onAnalyticsClick, onSearchClick }: SettingsProps) {
   const [isNotificationsEnabled, setIsNotificationsEnabled] = useState(false);
   const [isSidebarOpen, setSidebarOpen] = useState(false);
+  const [isAnimatingOut, setIsAnimatingOut] = useState(false);
 
-  if (!isOpen) return null;
+  if (!isOpen && !isAnimatingOut) return null;
 
   // Use the isDarkMode prop directly from parent
   const handleDarkModeToggle = () => {
@@ -90,14 +91,27 @@ export default function Settings({ isOpen, onClose, isDarkMode, onToggleDarkMode
     }
   };
 
+  const handleClose = () => {
+    setIsAnimatingOut(true);
+    setTimeout(() => {
+      setIsAnimatingOut(false);
+      onClose();
+    }, 300); // Match animation duration
+  };
+
   return (
     <>
-      <div className={`absolute inset-0 z-[70] transition-colors duration-300 ${isDarkMode ? 'bg-[#1E1E1E]' : 'bg-white'}`} data-name="Settings">
+      <div 
+        className={`absolute inset-0 z-[70] transition-all duration-300 ${isDarkMode ? 'bg-[#1E1E1E]' : 'bg-white'} ${
+          isAnimatingOut ? 'animate-[slideOutRight_0.3s_ease-in-out_forwards]' : 'animate-[slideInRight_0.3s_ease-in-out]'
+        }`} 
+        data-name="Settings"
+      >
         <div className="absolute h-[932px] left-[-3px] opacity-10 top-[-6px] w-[431px]" data-name="Untitled design (4) 1">
           <img alt="" className="absolute inset-0 max-w-none object-50%-50% object-cover pointer-events-none size-full" src={imgUntitledDesign41} />
         </div>
         <button 
-          onClick={onClose}
+          onClick={handleClose}
           className="cursor-pointer hover:opacity-70 transition-opacity"
         >
           <div className="absolute h-[21.998px] left-[35px] top-[53px] w-[9px]">
